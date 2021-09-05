@@ -7,127 +7,171 @@
 
 include <utility.scad>
 
-// run me!!!
-//KeyValue_Demo();
+//
+// DEMO
+//
 
-module KeyValue_Demo() {
-    table = KeyValue( [         
-                "solo"  , 0,
-                "fruit" , KeyValue( [ "apple",  1, "banana",  2, "carrot",  3 ] ),
-                "color" , KeyValue( [ "red"  , 11, "green" , 12, "blue"  , 13 ] ),
-                "animal", KeyValue( [ "dog"  , 21, "cat"   , 22, "mouse" , 23 ] ),
-                "model" , "ABC123"
-        ] );
-    
-    kvShow( table );
+    // run me!!!
+    //KeyValue_Demo();
 
-    echo( kvGet( table, "solo" ) );             // 0
-    echo( kvGet( table, "fruit.apple" ) );      // 1
-    echo( kvGet( table, "color.green" ) );      // 12
-    echo( kvGet( table, "animal.mouse" ) );     // 13
-    echo( kvGet( table, "model" ) );            // "ABC123"
-    
-    // return undef is missing
-    echo( kvSearch( table, "solo.hans" ) );     // undef
-    echo( kvSearch( table, "animal.dragon" ) ); // undef
-    echo( kvSearch( table, "Model" ) );         // undef
-
-    // missing but with default value
-    echo( kvGet( table, "whatever", 123 ) );    // 123
-    
-    // ASSERT FAILED
-    echo( kvGet( table, "solo.hans" ) );
-}
-
-function KeyValue( list ) =
-    // input  = [ "a", 1, "b", 2, "c", 3 ]
-    // output = [ ["a",1] , ["b",2] , ["c",3] ]
-    [ for(i=[0:2:len(list)-1]) [ list[i], list[i+1] ] ];
-
-// key is expected to exist, fail if missing unless defaultValue is specified
-function kvGet(keyValues,keywords,defaultValue=undef) =
-    kvFindCore(keyValues,keywords,defaultValue,failOnUndef=true);
-
-// possibly missing, return undef, no fail
-function kvSearch(keyValues,keywords,defaultValue=undef) =
-    kvFindCore(keyValues,keywords,defaultValue,failOnUndef=false);
-
-function kvFindCore(keyValues,keywords,defaultValue=undef,failOnUndef=true) =
-    let (
-        e1=ErrorIf(keyValues==undef,"missing table"),
-        e2=ErrorIf(keyValues==undef,"missing keywords"),
-        Break = function(keywords,breaker=".")
-            let (
-                pos = search(breaker,keywords,0)[0],
-                // search( ".", "aa.bb.cc.dd", 0 ) ==> [[2,5,8]]
-                ext = concat(
-                    0,                               // 0
-                    [ for(i=pos) each([i-1,i+1]) ],  // pos-1, pos+1
-                    len(keywords)-1                  // N
-                )
-                // extract [0:pos1-1],[pos1+1:pos2-1]...[posN+1,N]
-            )
-            ( len(pos)==0 ) ? [keywords] : 
-            [ for(i=[0:2:len(ext)-1]) ExtractString(keywords,ext[i],ext[i+1]) ],
-            // echo( Break( "apple" ) );         // ==> ["apple"]
-            // echo( Break( "a.bb.ccc.dddd" ) ); // ==> ["a","bb","ccc","dddd"]        
-    
-        ExtractString = function(string,start,end)
-            ConcatStr( [ for(i=[start:end]) string[i] ] ),
-            // echo( ExtractString("apple",2,3) ); // ==> "pl"
-
-        ConcatStr = function(charList,index=0)
-            ( len(charList)-1==index ) ? charList[index] :
-            str( charList[index], ConcatStr(charList,index+1) ),
-            //echo( str("a","b","c") );         // ==> "abc"
-            //echo( str(["a","b","c"]) );       // ==> ["a","b","c"] not what we want
-            //echo( ConcatStr(["a","b","c"]) ); // ==> "abc"
-            //echo( ConcatStr([1,2,3]) );       // ==> "123"
-            
-        FindCore = function(table,tIndex,keys,kIndex)
-            ( table==undef || !is_list(table) || len(table)<=tIndex ) ?
-                // not a list or empty                
-                undef
-            : ( table[tIndex][0]==keys[kIndex] ) ? (
-                // found ...
-                ( len(keys)-1==kIndex ) ?
-                    // ... last key - return value
-                    table[tIndex][1]
-                :
-                    // ... find next subkey
-                    FindCore(table[tIndex][1],0,keys,kIndex+1)
-            ) : ( len(table)-1==tIndex ) ? (
-                // last entry and did not match
-                undef
-            ) : (
-                // check next entry
-                FindCore(table,tIndex+1,keys,kIndex)
-            ),
-
-        keys   = Break(keywords),
-        found  = FindCore(keyValues,0,keys,0),
-        result = ( found==undef ) ? defaultValue : found,
-        has    = !failOnUndef || result!=undef
-    )
-    assert( has, str( "[", keywords, "] missing" ) ) // assertion 'has' failed - HAHA!
-    result;
-
-module kvEcho(keyValues) {
-
-    echo( show(keyValues,"") );
-    
-    function show(a,indent) =
-        ConcatStr([
-            for( i=[0:len(a)-1] )
-            ( is_list(a[i][1]) ) ?            
-                str( "\n", indent, key(a[i][0]), " =", show(a[i][1],str(indent,"     ")) )
-            :
-                str( "\n", indent, key(a[i][0]), ": ", value(a[i][1]) )
+    module KeyValue_Demo() {
+        table = KeyValue([
+            "solo"   , 0,
+            "notSure", undef,
+            "fruit"  , KeyValue([ "apple", 1,      "banana", 2,       "carrot", 3     ]),
+            "color"  , KeyValue([ "red"  , "meat", "green" , "grass", "blue"  , "sky" ]),
+            "animal" , KeyValue([
+                "dog"  , KeyValue([
+                    "breed", KeyValue([ "poodle",  10, "chihuahua", 20 ]),
+                    "color", KeyValue([ "white",   30, "brown",     40 ]) ]),
+                "cat"  , KeyValue([
+                    "breed", KeyValue([ "siamese", 50, "persian",   60 ]),
+                    "color", KeyValue([ "cream",   70, "lilac",     80 ]) ]) ]),
+            "model", "ABC123"
         ]);
-    ConcatStr = function(charList,index=0)
-        ( len(charList)-1==index ) ? charList[index] :
-        str( charList[index], ConcatStr(charList,index+1) );
-    function key(k)   = is_undef (k) ? "<undef>"  : k;
-    function value(v) = is_undef (v) ? "<undef>"  :
-                        is_string(v) ? str("'",v,"'") : v;
-}
+        
+        kvEcho( table );
+        echo( kvKeys  ( table ) );          // ["solo", "notSure", "fruit", "color", "animal", "model"]
+        echo( kvKeys  ( table, "color" ) ); // ["red", "green", "blue"]
+        echo( kvValues( table, "fruit" ) ); // [1, 2, 3]
+        
+        echo( "\n\nEXPECTED KEYS:" );
+        echo( kvGet( table, "solo" ) );                   // 0
+        echo( kvGet( table, "notSure" ) );                // undef
+        echo( kvGet( table, "fruit.apple" ) );            // 1
+        echo( kvGet( table, "color.green" ) );            // "grass"
+        echo( kvGet( table, "animal.dog.color.white" ) ); // 30
+        echo( kvGet( table, "model" ) );                  // "ABC123"
+        //echo( kvGet( table, "missingKey" ) );           // ERROR: "[missingKey] missing"
+        //echo( kvGet( table, "fruit.dragon" ) );         // ERROR: "[dragon] in [fruit.dragon] missing"
+
+        echo( "\n\nINNER TABLE:" );
+        animalTable = kvGet( table, "animal" );
+        echo( kvGet( animalTable, "cat.breed.siamese" ) );         // 50
+
+        echo( "\n\nDEFAULT VALUES:" );
+        echo( kvGet( table, "notSure" ) );                         // undef
+        echo( kvGet( table, "notSure",      defaultValue=true ) ); // true
+        //echo( kvGet( table, "missingKey", defaultValue=1 ) );    // ERROR: "[missingKey] missing"
+
+        // return undef if missing
+        echo( "\n\nOPTIONAL KEYS:" );
+        echo( kvSearch( table, "missingKey" ) );                   // undef
+        echo( kvSearch( table, "animal.dragon" ) );                // undef
+        echo( kvSearch( table, "Model" ) );                        // undef
+        
+        echo( kvSearch( table, "missingKey", defaultValue=123 ) ); // 123
+        echo( kvSearch( table, "notSure",    defaultValue=123 ) ); // 123
+
+        echo( "\n\nMISSING vs UNDEF:" );
+        echo( kvSearchOCD( table, 
+            "missingKey",                                   defaultValue="dunno" ) );   // undef
+        echo( kvSearchOCD( table, 
+            "notSure",
+                                                            defaultValue="dunno" ) );   // "dunno"
+        echo( kvSearchOCD( table, 
+            "missingKey",         defaultMissing="missing"                       ) );   // "missing"
+        echo( kvSearchOCD( table, 
+            "notSure",            defaultMissing="missing"                       ) );   // undef
+        echo( kvSearchOCD( table, 
+            "missingKey",         defaultMissing="missing", defaultValue="dunno" ) );   // "missing"
+        echo( kvSearchOCD( table, 
+            "notSure",            defaultMissing="missing", defaultValue="dunno" ) );   // "dunno"
+    }
+
+
+//
+// CREATE
+//
+
+    function KeyValue( list ) =
+        // input  = [ "a", 1, "b", 2, "c", 3 ]
+        // output = [ ["a",1] , ["b",2] , ["c",3] ]
+        [ for(i=[0:2:len(list)-1]) [ list[i], list[i+1] ] ];
+
+    function kvKeys(keyValues,key=undef) = let (
+            kv = (key==undef)?keyValues:kvGet(keyValues,key)        
+        )
+        [ for(i=kv) i[0] ];
+            
+    function kvValues(keyValues,key=undef) = let (
+            kv = (key==undef)?keyValues:kvGet(keyValues,key)        
+        )
+        [ for(i=kv) i[1] ];
+
+//
+// GET
+//
+
+    // key is expected to exist:
+    // - fail if missing
+    // - return defaultValue, if found and value is undef
+    function kvGet(keyValues,key,defaultValue=undef) =
+        kvFindCore(keyValues,key,defaultValue=defaultValue,failIfMissing=true);
+
+    // optional key:
+    // - return defaultValue, if key is missing
+    // - return defaultValue, if found and value is undef
+    function kvSearch(keyValues,key,defaultValue=undef) =
+        kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultValue,failIfMissing=false);
+
+    // optional key:
+    // - return defaultMissing, if key is missing
+    // - return defaultValue,   if found and value is undef
+    function kvSearchOCD(keyValues,key,defaultValue=undef,,defaultMissing=undef) =
+        kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultMissing,failIfMissing=false);
+
+    function kvFindCore(keyValues,key,defaultValue=undef,defaultMissing=undef,failIfMissing=true) =
+        let (
+            
+            has=false,
+            e1=(keyValues==undef||!is_list(keyValues)?assert(has,"table not specified"):0),
+            e2=(key      ==undef?assert(has,"key not specified" ):0),
+
+            FindCore = function(table,tIndex,keywords,kIndex)
+                ( table[tIndex][0]==keywords[kIndex] ) ? (
+                    // found ...
+                    ( len(keywords)-1==kIndex ) ?
+                        // ... last key - return value
+                        (table[tIndex][1]==undef) ? defaultValue : table[tIndex][1]
+                    :
+                        // ... find next subkey
+                        FindCore(table[tIndex][1],0,keywords,kIndex+1)
+                ) : ( table[tIndex+1]==undef || !is_list(table[tIndex+1]) || len(table)-1==tIndex ) ? (
+                    // current entry did not match
+                    // next entry is invalid or no next entry
+                    (failIfMissing)?(
+                        (len(keywords)==1)?
+                            assert(has,str( "[", key, "] missing" ))
+                        :
+                            assert(has,str( "[", keywords[kIndex], "] in [", key, "] missing" ))
+                    ) :
+                        defaultMissing
+                ) : (
+                    // check next entry
+                    FindCore(table,tIndex+1,keywords,kIndex)
+                ),
+
+            keywords = strsplit(key,"."),
+            result   = FindCore(keyValues,0,keywords,0)
+        )
+        result;
+
+//
+// ECHO
+//
+
+    module kvEcho(keyValues) {
+        echo( show(keyValues,"") );        
+        function show(a,indent) =
+            strcat([
+                for( i=[0:len(a)-1] )
+                ( is_list(a[i][1]) ) ?            
+                    str( "\n", indent, key(a[i][0]), " =", show(a[i][1],str(indent,"   ")) )
+                :
+                    str( "\n", indent, key(a[i][0]), ": ", value(a[i][1]) )
+            ]);
+        function key(k)   = is_undef (k) ? "<undef>"  : k;
+        function value(v) = is_undef (v) ? "<undef>"  :
+                            is_string(v) ? str("\"",v,"\"") : v;
+    }
