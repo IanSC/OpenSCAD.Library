@@ -3,6 +3,9 @@
 
 ### String
 **strcat()**: concatenate string list
+<details>
+  <summary>examples</summary>
+
 ```
 a = ["apple","banana","carrot"];
 echo( str   (a    ) ); // ["apple","banana","carrot"]
@@ -12,6 +15,9 @@ b = [1,22,333];
 echo( strcat(b    ) ); // "122333"
 echo( strcat(b,"-") ); // "1-22-333"
 ```
+
+</details>
+
 **strsplit()**: split string to list
 ```
 echo( strsplit( "apple"         ) ); // ["apple"]
