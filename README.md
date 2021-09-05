@@ -1,10 +1,14 @@
 # OpenSCAD.Library
 
-
+---
 ### String
-**strcat()**: concatenate string list
+**strcat()**: concatenate string list  
+**strsplit()**: split string to list  
+**substr()**: extract characters from list (start,length)  
+**substr2()**: extract characters from list (start,end)
+
 <details>
-  <summary>examples</summary>
+  <summary>&nbsp; &nbsp;<i>strcat() sample</i></summary>
 
 ```
 a = ["apple","banana","carrot"];
@@ -15,30 +19,42 @@ b = [1,22,333];
 echo( strcat(b    ) ); // "122333"
 echo( strcat(b,"-") ); // "1-22-333"
 ```
-
 </details>
+<details>
+  <summary>&nbsp; &nbsp;<i>strsplit() sample</i></summary>
 
-**strsplit()**: split string to list
 ```
 echo( strsplit( "apple"         ) ); // ["apple"]
 echo( strsplit( "a.bb.ccc.dddd" ) ); // ["a","bb","ccc","dddd"]
 ```
-**substr()**: extract characters from list (start,length)
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>substr() sample</i></summary>
+
 ```
 echo( substr( "television"       ) ); // "television"
 echo( substr( "television", 4    ) ); // "vision"
 echo( substr( "television", 4, 5 ) ); // "visio"
 ```
-**substr2()**: extract characters from list (start,end)
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>substr2() sample</i></summary>
+
 ```
 echo( substr2( "television"       ) ); // "television"
 echo( substr2( "television", 4    ) ); // "vision"
 echo( substr2( "television", 4, 5 ) ); // "vi"
 ```
+</details>
 
-
+---
 ### Numbers
-**numRound()**: number rounding
+**numRound()**: number rounding  
+**numFormat()**: number formatting
+
+<details>
+  <summary>&nbsp; &nbsp;<i>numRound() sample</i></summary>
+
 ```
 echo( numRound( 123.45678     ) ); // 123.46
 echo( numRound( 123.45678,  0 ) ); // 123
@@ -46,7 +62,10 @@ echo( numRound( 123.45678,  1 ) ); // 123.5
 echo( numRound( 123.45678, -1 ) ); // 120
 echo( numRound( 123.45678, -2 ) ); // 100
 ```
-**numFormat()**: number formatting
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>numFormat() sample</i></summary>
+
 ```
 n = 123456789.123456789;
 echo( numFormat( n                               ) ); // "123,456,789.12"
@@ -54,10 +73,16 @@ echo( numFormat( n, 4                            ) ); // "123,456,789.1235"
 echo( numFormat( n,    sep1000="`", decPoint="-" ) ); // "123`456`789-12"
 echo( numFormat( n, 4, pos1000=4                 ) ); // "1,2345,6789.1235"
 ```
+</details>
 
-
+---
 ## List Manipulation
-**listSum()**: calculate sum from list given range
+**listSum()**: calculate sum from list given range  
+**listRunningSum()**: running totals
+
+<details>
+  <summary>&nbsp; &nbsp;<i>listSum() sample</i></summary>
+
 ```
 a=[1,2,3,4,5];
 echo( listSum(a          )); // 15
@@ -69,14 +94,30 @@ echo( listSum(a, -10,  3 )); // 10
 echo( listSum(a,   2,  0 )); // undef
 echo( listSum(a,  10, 20 )); // undef
 ```
-**listRunningSum()**: running totals
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>listRunningSum() sample</i></summary>
+
 ```
 a=[1,2,3,4,5];
 echo( listRunningSum(a) );   // [1, 3, 6, 10, 15]
 ```
+</details>
 
+---
 ### Key-Value  
-**KeyValue()**: create table
+**KeyValue()**: create table  
+**kvKeys()**: get keys  
+**kvValues()**: get values  
+**kvExists()**: check if keys exists  
+**kvShow()**: echo to console  
+**kvGet()**: get expected key  
+**kvSearch()**: get optional keys  
+**kvSearchOCD()**: differentiates between missing keys and not defined
+
+<details>
+  <summary>&nbsp; &nbsp;<i>KeyValue() sample</i></summary>
+
 ```
 table = KeyValue([
     "solo"   , 0,
@@ -93,14 +134,28 @@ table = KeyValue([
     "model", "ABC123"
 ]);
 ```
-**kvKeys()**: get keys  
-**kvValues()**: get values
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>kvKeys()/kvValues() sample</i></summary>
+
 ```
 echo( kvKeys  ( table ) );          // ["solo", "notSure", "fruit", "color", "animal", "model"]
 echo( kvKeys  ( table, "color" ) ); // ["red", "green", "blue"]
 echo( kvValues( table, "fruit" ) ); // [1, 2, 3]
 ```
-**kvShow()**: echo to console
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>kvExists() sample</i></summary>
+
+```
+echo( kvExists( table, "solo" ) );                     // true
+echo( kvExists( table, "animal.dog.breed.poodle" ) );  // true
+echo( kvExists( table, "animal.dog.breed.bulldog" ) ); // false
+```
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>kvShow() sample</i></summary>
+
 ```
 kvShow( table );
 
@@ -133,7 +188,11 @@ CONSOLE:
             lilac: 80
     model: "ABC123"
 ```
-**kvGet()**: get expected key
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>kvGet() sample</i></summary>
+
+Get expected keys. Throws error if key is missing.
 ```
 echo( kvGet( table, "solo" ) );                   // 0
 echo( kvGet( table, "notSure" ) );                // undef
@@ -158,7 +217,11 @@ echo( kvGet( table, "notSure" ) );                       // undef
 echo( kvGet( table, "notSure",    defaultValue=true ) ); // true
 echo( kvGet( table, "missingKey", defaultValue=1    ) ); // ERROR: "[missingKey] missing"
 ```
-**kvSearch()**: get optional keys. Returns **undef** if missing.
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>kvSearch() sample</i></summary>
+
+Get optional keys. Returns **undef** if missing.
 ```
 echo( kvSearch( table, "solo.hans" ) );     // undef
 echo( kvSearch( table, "animal.dragon" ) ); // undef
@@ -169,7 +232,11 @@ echo( kvSearch( table, "Model" ) );         // undef
 echo( kvSearch( table, "solo.hans", defaultValue=123 ) ); // 123
 echo( kvSearch( table, "notSure",   defaultValue=123 ) ); // 123
 ```
-**kvSearchOCD()**: differentiate between missing and not defined
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>kvSearchOCD() sample</i></summary>
+
+Differentiates between missing keys or set as **undef**.
 ```
 echo( kvSearchOCD( table, "missingKey",                           defaultValue="dunno" ) );   // undef
 echo( kvSearchOCD( table, "notSure",                              defaultValue="dunno" ) );   // "dunno"
@@ -178,9 +245,9 @@ echo( kvSearchOCD( table, "notSure",    defaultMissing="missing"                
 echo( kvSearchOCD( table, "missingKey", defaultMissing="missing", defaultValue="dunno" ) );   // "missing"
 echo( kvSearchOCD( table, "notSure",    defaultMissing="missing", defaultValue="dunno" ) );   // "dunno"
 ```
+</details>
 
-
-
+---
 ## TEST ONLY
 <details>
 

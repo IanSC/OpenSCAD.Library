@@ -12,7 +12,7 @@ include <utility.scad>
 //
 
     // run me!!!
-    //KeyValue_Demo();
+    KeyValue_Demo();
 
     module KeyValue_Demo() {
         table = KeyValue([
@@ -34,6 +34,11 @@ include <utility.scad>
         echo( kvKeys  ( table ) );          // ["solo", "notSure", "fruit", "color", "animal", "model"]
         echo( kvKeys  ( table, "color" ) ); // ["red", "green", "blue"]
         echo( kvValues( table, "fruit" ) ); // [1, 2, 3]
+        
+        echo( "\n\nKEYS EXISTS:" );
+        echo( kvExists( table, "solo" ) );                    // true
+        echo( kvExists( table, "animal.dog.breed.poodle" ) ); // true
+        echo( kvExists( table, "animal.dog.breed.bulldog" ) ); // false
         
         echo( "\n\nEXPECTED KEYS:" );
         echo( kvGet( table, "solo" ) );                   // 0
@@ -120,6 +125,11 @@ include <utility.scad>
     // - return defaultValue,   if found and value is undef
     function kvSearchOCD(keyValues,key,defaultValue=undef,,defaultMissing=undef) =
         kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultMissing,failIfMissing=false);
+
+    // check if key exists
+    function kvExists(keyValues,key) = let(
+        r = kvFindCore(keyValues,key,defaultValue=true,defaultMissing=undef,failIfMissing=false)
+    ) (r!=undef);
 
     function kvFindCore(keyValues,key,defaultValue=undef,defaultMissing=undef,failIfMissing=true) =
         let (
