@@ -17,41 +17,54 @@ include <utility.scad>
 //
 
     // run me!!!
-    StepperMotor_Demo();
+    //StepperMotor_Demo();
 
     module StepperMotor_Demo() {
         
         profile1 = StepperMotorProfile( nemaModel="NEMA17" );
         generateMotorAndPanel( profile1 );
         
-        // Wantai 57BYGH420-2
-        // https://www.sparkfun.com/products/13656
+        // custom size
+        // https://www.sparkfun.com/products/13656 ==> Wantai 57BYGH420-2
         // https://www.openimpulse.com/blog/wp-content/uploads/wpsc/downloadables/57BYGH420-Stepper-Motor-Datasheet.pdf
         profile2 = StepperMotorProfile(
-            bodyDiameter=56.4, bodyLength=56, shaftDiameter=6.35, shaftLength=21-1.6,
-            boltDiameter=5, boltLength=10, boltToBoltDistance=47.14,
-            frontCylinderDiameter=38.1, frontCylinderLength=1.6,
-            frontFlangeLength=4.8, bodyTaper=1 );
+            model              = "Wantai 57BYGH420-2",
+            bodyDiameter       = 56.4,
+            bodyLength         = 56,
+            shaftDiameter      = 6.35,
+            shaftLength        = 21-1.6,
+            boltDiameter       = 5,
+            boltLength         = 10,
+            boltToBoltDistance = 47.14,
+            frontCylinder      = [38.1,1.6], // diameter,height
+            flangeThickness    = [4.8,0],    // top, bottom
+            bodyTaper          = 1 );
         translate( [100,0,0] )
             generateMotorAndPanel( profile2 );
+        kvEcho( profile2 );
         
         // with gear, bolts on gear
-        profile3 = StepperMotorProfile( nemaModel="NEMA23",
-            boltToBoltDistance=20,
-            frontCylinderDiameter=40, frontCylinderLength=30 );
+        profile3 = StepperMotorProfile(
+            nemaModel          = "NEMA23",
+            boltToBoltDistance = 20,
+            frontCylinder      = [40,20]
+        );
         translate( [200,0,0] )
             generateMotorAndPanel( profile3 );
             
         // with gear, bolts on body, back cylinder and shaft
         // bigger panel hole
-        profile4 = StepperMotorProfile( nemaModel="NEMA23",
-            boltDiameter=8, boltLength=25+8, // go below frontCylinderLength
-            boltToBoltDistance=38,
-            frontCylinderDiameter=40, frontCylinderLength=25,
-            panelHoleDiameter=40+2, // larger than frontCylinderDiameter
-            backCylinderDiameter=40, backCylinderLength=20, backShaftLength=20 );
+        profile4 = StepperMotorProfile(
+            nemaModel          = "NEMA23",
+            boltDiameter       = 8,
+            boltLength         = 25+8,    // go below frontCylinderLength
+            boltToBoltDistance = 38,
+            frontCylinder      = [40,25],
+            backCylinder       = [40,20],
+            panelHoleDiameter  = 40+2,    // larger than frontCylinderDiameter
+            backShaftLength    = 20 );
+        // position to upper flange
         translate( [300,0,0] ) {
-            // position to upper flange
             translate( [0,0, kvGet(profile4,"length.frontCylinder")] )
                 StepperMotor( profile4 );
             translate( [0,-100,0] )
@@ -138,16 +151,25 @@ include <utility.scad>
     function StepperMotorProfile(
         model = "",
         nemaModel = undef,
+
         bodyDiameter, bodyLength,
         shaftDiameter, shaftLength,
-        boltDiameter = undef, boltLength = 5, boltToBoltDistance = undef,
-        frontCylinderDiameter = 0, frontCylinderLength = 0,
-        backCylinderDiameter  = 0, backCylinderLength  = 0,
+
+        boltProfile,
+        boltDiameter, boltLength,
+        boltToBoltDistance,
+
+        frontCylinder, // [ diameter, height ]
+        backCylinder,  // [ diameter, height ]
+
+        //frontCylinderDiameter = 0, frontCylinderLength = 0,
+        //backCylinderDiameter  = 0, backCylinderLength  = 0,
+        flangeThickness, // [ upper flange, lower flange ]
+        //frontFlangeLength = undef, backFlangeLength = undef, 
+        bodyTaper,     // taper between flanges
+        overallTaper,  // taper on flanges and body
         backShaftLength = 0,
-        frontFlangeLength = undef, backFlangeLength = undef, bodyTaper = undef,
-        panelHoleDiameter = undef,
-        overallTaper = undef
-    
+        panelHoleDiameter
     ) = let(
 
         sel = function( d1, d2, d3 ) ((d1!=undef) ? d1 : (d2!=undef) ? d2 : d3 ),
@@ -160,17 +182,26 @@ include <utility.scad>
         eBodyLength    = sel( bodyLength,         kvSearchLax(nemaData,"bodyLength"   ) ),
         eShaftDiameter = sel( shaftDiameter,      kvSearchLax(nemaData,"shaftDiameter") ),
         eShaftLength   = sel( shaftLength,        kvSearchLax(nemaData,"shaftLength"  ) ),
-        eBoltDiameter  = sel( boltDiameter,       kvSearchLax(nemaData,"boltDiameter" ), 0 ),
         eB2BDistance   = sel( boltToBoltDistance, kvSearchLax(nemaData,"boltDistance" ), eBodyDiameter*0.8 ),
+
+        //eBoltDiameter  = sel( boltDiameter,       kvSearchLax(nemaData,"boltDiameter" ), 0 ),
+        eBoltDiameter  = sel( boltDiameter, kvSearchLax(boltProfile,"diameter" ), kvSearchLax(nemaData,"boltDiameter" ) ),
+        eBoltLength    = sel( boltLength  , kvSearchLax(boltProfile,"length"   ), 5 ),
+
+        frontCylinderDiameter = sel( frontCylinder[0], 0 ), frontCylinderLength = sel( frontCylinder[1], 0 ),
+        backCylinderDiameter  = sel( backCylinder [0], 0 ), backCylinderLength  = sel( backCylinder [1], 0 ),
 
         // if not specified assume shaftDiameter + 2mm
         ePanelHoleDiameter = sel( panelHoleDiameter,  eShaftDiameter+2 ),
 
         eOverallTaper = sel( overallTaper, eBodyDiameter*0.05 /* 5% of body */ ),
 
-        // assume flange to be 25% of body if both flanges are not specified
-        eFrontFlangeLength = sel( frontFlangeLength, IIF(backFlangeLength ==undef,eBodyLength*0.25,0) ),
-        eBackFlangeLength  = sel( backFlangeLength,  IIF(frontFlangeLength==undef,eBodyLength*0.25,0) ),
+        // assume flange to be 25% of body if not specified
+        eFrontFlangeLength = (flangeThickness==undef)?eBodyLength*0.25:flangeThickness[0],
+        eBackFlangeLength  = (flangeThickness==undef)?eBodyLength*0.25:flangeThickness[1],
+
+        //eFrontFlangeLength = sel( frontFlangeLength, IIF(backFlangeLength ==undef,eBodyLength*0.25,0) ),
+        //eBackFlangeLength  = sel( backFlangeLength,  IIF(frontFlangeLength==undef,eBodyLength*0.25,0) ),
 
         // assume body taper if has flanges 
         eBodyTaper = sel( bodyTaper, 
@@ -178,6 +209,11 @@ include <utility.scad>
                 0,
                 min( eBodyDiameter*0.2, eBodyDiameter - eB2BDistance )
             ) ),
+//        eBodyTaper = sel( bodyTaper, 
+//            IIF( eFrontFlangeLength==0 && eBackFlangeLength==0,
+//                0,
+//                min( eBodyDiameter*0.2, eBodyDiameter - eB2BDistance )
+//            ) ),
             
         e1=ErrorIf( nemaModel!=undef && nemaData==undef, "NEMA model not found" ),
         e2=ErrorIf( eBodyLength-eFrontFlangeLength-eBackFlangeLength<=0, "flanges too thick" )
@@ -199,7 +235,7 @@ include <utility.scad>
             "backFlange"   , eBackFlangeLength ]),
         "shaft"            , KeyValue([ "diameter", eShaftDiameter, "length", eShaftLength ]),
         "backShaft"        , KeyValue([ "diameter", eShaftDiameter, "length", backShaftLength ]),
-        "bolt"             , KeyValue([ "diameter", eBoltDiameter,  "length", boltLength, "distance", eB2BDistance ]),
+        "bolt"             , KeyValue([ "diameter", eBoltDiameter,  "length", eBoltLength, "distance", eB2BDistance ]),
         "panelHole"        , ePanelHoleDiameter,
         "frontCylinder"    , KeyValue([ "diameter", frontCylinderDiameter, "length", frontCylinderLength ]),
         "backCylinder"     , KeyValue([ "diameter", backCylinderDiameter,  "length", backCylinderLength  ]),
@@ -251,6 +287,10 @@ include <utility.scad>
             betweenFlangeHeight = bodyOnlyLength - frontFlangeLength - backFlangeLength;
 
             // make body smaller if has upper/lower flange for aesthetics
+            // ebodyWidth = ( frontFlangeLength!=0||lowerFlangeHeight!=0 ? 
+            //     min( bodyWidth*0.90, bodyWidth-taperOverall*20 )
+            //     : bodyWidth );
+
             ebodyWidth = bodyWidth * 
                 ( frontFlangeLength != 0 || lowerFlangeHeight != 0 ? 0.95 : 1 );
 
@@ -272,7 +312,8 @@ include <utility.scad>
                                 if ( betweenFlangeHeight > 0 )
                                     linear_extrude( betweenFlangeHeight )
                                     difference() {
-                                        square( [ebodyWidth,ebodyWidth], center=true );
+                                        taperedSquare( ebodyWidth, taperOverall );
+                                        //square( [ebodyWidth,ebodyWidth], center=true );
                                         {
                                             bw2 = ebodyWidth / 2;
                                             translate( [ bw2, bw2,0] ) circle( r=taperBody );

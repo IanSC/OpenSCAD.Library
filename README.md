@@ -27,39 +27,39 @@
 <tr><td colspan="2"><h4>stringJoin( list, separator="" )
 <tr><td>list        <td>list of strings
 <tr><td>separator   <td>optional separator between items
-<tr><td>return value<td>string
+<tr><td><b><i>return<td>string
 </table>
 <table>
 <tr><td colspan="2"><h4>stringSplit( string, breaker="." )
 <tr><td>string      <td>string to split
 <tr><td>breaker     <td>breaker to use to separate each substring
-<tr><td>return value<td>list of string
+<tr><td><b><i>return<td>list of string
 </table>
 <table>
 <tr><td colspan="2"><h4>stringLeft( string, length )
 <tr><td>string      <td>string to extract from
-<tr><td>length     <td>number of characters to extract from the left
-<tr><td>return value<td>string
+<tr><td>length      <td>number of characters to extract from the left
+<tr><td><b><i>return<td>string
 </table>
 <table>
 <tr><td colspan="2"><h4>stringRight( string, length )
 <tr><td>string      <td>string to extract from
-<tr><td>length     <td>number of characters to extract from the right
-<tr><td>return value<td>string
+<tr><td>length      <td>number of characters to extract from the right
+<tr><td><b><i>return<td>string
 </table>
 <table>
 <tr><td colspan="2"><h4>stringMid( string, start, length )
 <tr><td>string      <td>string to extract from
 <tr><td>start       <td>starting character position to extract
 <tr><td>length      <td>number of characters to extract
-<tr><td>return value<td>string
+<tr><td><b><i>return<td>string
 </table>
 <table>
 <tr><td colspan="2"><h4>stringExtract( string, start, end )
 <tr><td>string      <td>string to extract from
 <tr><td>start       <td>starting character position to extract
 <tr><td>end         <td>ending character position to extract
-<tr><td>return value<td>string
+<tr><td><b><i>return<td>string
 </table>
 </details>
 
@@ -120,7 +120,7 @@ echo( stringExtract( "television", 4, 5 ) );   //     "vi"
 <tr><td colspan="2"><h4>numRound( value, decPlace=2 )
 <tr><td>value       <td>number to round
 <tr><td>decPlace    <td>decimal places to round to
-<tr><td>return value<td>number
+<tr><td><b><i>return<td>number
 </table>
 <table>
 <tr><td colspan="2"><h4>numFormat( value, decPlace=2, pos1000=3, sep1000=",", decPoint="." )
@@ -129,7 +129,7 @@ echo( stringExtract( "television", 4, 5 ) );   //     "vi"
 <tr><td>pos1000     <td>number of digits for 'thousand' separator
 <tr><td>sep1000     <td>character for 'thousand' separator
 <tr><td>decPoint    <td>character for decimal point
-<tr><td>return value<td>string
+<tr><td><b><i>return<td>string
 </table>
 </details>
 
@@ -174,12 +174,12 @@ echo( numFormat( n, 4, pos1000=4                 ) ); // "1,2345,6789.1235"
 <tr><td>list        <td>list of numbers
 <tr><td>start       <td>starting position to sum
 <tr><td>end         <td>ending position to sum
-<tr><td>return value<td>number
+<tr><td><b><i>return<td>number
 </table>
 <table>
 <tr><td colspan="2"><h4>listRunningSum( list )
 <tr><td>list        <td>list of numbers
-<tr><td>return value<td>list of numbers, output[n]=sum(input[0]:input[n])
+<tr><td><b><i>return<td>list of numbers, output[n]=sum(input[0]:input[n])
 </table>
 </details>
 
@@ -235,60 +235,59 @@ echo( listRunningSum(a) );   // [1, 3, 6, 10, 15]
 
 <table>
 <tr><td colspan="2"><h4>KeyValue( list )
-<tr><td>list        <td>list of key-value pair
-<tr><td>return value<td>list (referred to as table)
+<tr><td>table       <td>KeyValue() table
+<tr><td><b><i>return<td>list (referred to as table)
 </table>
 <table>
 <tr><td colspan="2"><h4>kvKeys( table, key )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>if specified, returns the keys of table[key] instead
-<tr><td>return value<td>list of keys
+<tr><td><b><i>return<td>list of keys
 </table>
 <table>
 <tr><td colspan="2"><h4>kvValues( table, key )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>if specified, returns the values table[key] instead
-<tr><td>return value<td>list of values
+<tr><td><b><i>return<td>list of values
 </table>
 <table>
 <tr><td colspan="2"><h4>kvExists( table, key )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>key to check for
-<tr><td>return value<td>boolean
+<tr><td><b><i>return<td>boolean
 </table>
 <table>
 <tr><td colspan="2"><h4>kvShow( table )
-<tr><td>table       <td>table from KeyValue()
-<tr><td>return value<td>n/a, displays table to console
+<tr><td>table       <td>KeyValue() table to display on console
 </table>
 <table>
 <tr><td colspan="2"><h4>kvGet( table, key, defaultValue )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>key to get
 <tr><td>defaultValue<td>return if value found is undef
-<tr><td>return value<td>value from key
+<tr><td><b><i>return<td>value from key
 </table>
 <table>
 <tr><td colspan="2"><h4>kvSearch( table, key, defaultValue )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>key to get
 <tr><td>defaultValue<td>return if missing key or value found is undef
-<tr><td>return value<td>value from key
+<tr><td><b><i>return<td>value from key
 </table>
 <table>
 <tr><td colspan="2"><h4>kvSearchLax( table, key, defaultValue )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>key to get
 <tr><td>defaultValue<td>return if no table, missing key or value found is undef
-<tr><td>return value<td>value from key
+<tr><td><b><i>return<td>value from key
 </table>
 <table>
 <tr><td colspan="2"><h4>kvSearchOCD( table, key, defaultValue, ifKeyMissing )
-<tr><td>table       <td>table from KeyValue()
+<tr><td>table       <td>KeyValue() table
 <tr><td>key         <td>key to get
 <tr><td>defaultValue<td>return if value found is undef
 <tr><td>ifKeyMissing<td>return if key is missing
-<tr><td>return value<td>value from key
+<tr><td><b><i>return<td>value from key
 </table>
 <br>
 
@@ -424,6 +423,74 @@ model: "ABC123"
 </table>
 <details>
   <summary>&nbsp; &nbsp;<i>details</i></summary>
+
+<table>
+<tr><td colspan="2"><h4>StepperMotorProfile( ... )
+<tr><td>model             <td>user defined model name
+<tr><td>nemaModel         <td>use info from NEMA model (unless overridden)
+<tr><td>bodyDiameter      <td>width and depth of the motor
+<tr><td>bodyLength        <td>length excluding shafts and cylinders
+<tr><td>shaftDiameter     <td>shaft diameter
+<tr><td>shaftLength       <td>shaft length
+<tr><td>boltProfile       <td>use info from bolt profile (unless overridden)
+<tr><td>boltDiameter      <td>bolt diameter
+<tr><td>boltLength        <td>bold length
+<tr><td>boltToBoltDistance<td>distance between bolts
+<tr><td>frontCylinder     <td>list [ diameter, height ]
+<tr><td>backCylinder      <td>list [ diameter, height ]
+<tr><td>flangeThickness   <td>list [ upper height, lower height ]
+<tr><td>bodyTaper         <td>taper on body between flanges
+<tr><td>overallTaper      <td>taper on motor body
+<tr><td>backShaftLength   <td>length of shaft at the back
+<tr><td>panelHoleDiameter <td>size of center hole for panel mounting the motor
+<tr><td><b><i>return      <td>profile (KeyValue())
+</table>
+<table>
+<tr><td colspan="2"><h4>StepperMotor( profile )
+<tr><td>profile       <td>stepper motor profile to display
+</table>
+<table>
+<tr><td colspan="2"><h4>StepperMotorPanelHole( profile )
+<tr><td>profile       <td>stepper motor profile to generate panel holes for
+</table>
+
+Profile Structure:
+```
+type: "stepper motor"
+model: "Wantai 57BYGH420-2"
+nema: ""
+bodyDiameter: 56.4
+length =
+   all: 77
+   body: 57.6
+   bodyOnly: 56
+   frontCylinder: 1.6
+   backCylinder: 0
+   shaft: 19.4
+   backShaft: 0
+   frontFlange: 4.8
+   backFlange: 0
+shaft =
+   diameter: 6.35
+   length: 19.4
+backShaft =
+   diameter: 6.35
+   length: 0
+bolt =
+   diameter: 5
+   length: 10
+   distance: 47.14
+panelHole: 8.35
+frontCylinder =
+   diameter: 38.1
+   length: 1.6
+backCylinder =
+   diameter: 0
+   length: 0
+taper =
+   overall: 2.82
+   body: 1
+```
 </details>
 
 ![stepper-motor](/images/stepper-motor.png)
@@ -434,34 +501,45 @@ model: "ABC123"
 profile1 = StepperMotorProfile( nemaModel="NEMA17" );
 generateMotorAndPanel( profile1 );
 
-// Wantai 57BYGH420-2
-// https://www.sparkfun.com/products/13656
+// custom size
+// https://www.sparkfun.com/products/13656 ==> Wantai 57BYGH420-2
 // https://www.openimpulse.com/blog/wp-content/uploads/wpsc/downloadables/57BYGH420-Stepper-Motor-Datasheet.pdf
 profile2 = StepperMotorProfile(
-    bodyDiameter=56.4, bodyLength=56, shaftDiameter=6.35, shaftLength=21-1.6,
-    boltDiameter=5, boltLength=10, boltToBoltDistance=47.14,
-    frontCylinderDiameter=38.1, frontCylinderLength=1.6,
-    frontFlangeLength=4.8, bodyTaper=1 );
+    bodyDiameter       = 56.4,
+    bodyLength         = 56,
+    shaftDiameter      = 6.35,
+    shaftLength        = 21-1.6,
+    boltDiameter       = 5,
+    boltLength         = 10,
+    boltToBoltDistance = 47.14,
+    frontCylinder      = [38.1,1.6], // diameter,height
+    flangeThickness    = [4.8,0],    // top, bottom
+    bodyTaper          = 1 );
 translate( [100,0,0] )
     generateMotorAndPanel( profile2 );
 
 // with gear, bolts on gear
-profile3 = StepperMotorProfile( nemaModel="NEMA23",
-    boltToBoltDistance=20,
-    frontCylinderDiameter=40, frontCylinderLength=30 );
+profile3 = StepperMotorProfile(
+    nemaModel          = "NEMA23",
+    boltToBoltDistance = 20,
+    frontCylinder      = [40,20]
+);
 translate( [200,0,0] )
     generateMotorAndPanel( profile3 );
     
 // with gear, bolts on body, back cylinder and shaft
 // bigger panel hole
-profile4 = StepperMotorProfile( nemaModel="NEMA23",
-    boltDiameter=8, boltLength=25+8, // go below frontCylinderLength
-    boltToBoltDistance=38,
-    frontCylinderDiameter=40, frontCylinderLength=25,
-    panelHoleDiameter=40+2, // larger than frontCylinderDiameter
-    backCylinderDiameter=40, backCylinderLength=20, backShaftLength=20 );
+profile4 = StepperMotorProfile(
+    nemaModel          = "NEMA23",
+    boltDiameter       = 8,
+    boltLength         = 25+8,    // go below frontCylinderLength
+    boltToBoltDistance = 38,
+    frontCylinder      = [40,25],
+    backCylinder       = [40,20],
+    panelHoleDiameter  = 40+2,    // larger than frontCylinderDiameter
+    backShaftLength    = 20 );
+// position to upper flange
 translate( [300,0,0] ) {
-    // position to upper flange
     translate( [0,0, kvGet(profile4,"length.frontCylinder")] )
         StepperMotor( profile4 );
     translate( [0,-100,0] )
