@@ -17,43 +17,39 @@ include <utility.scad>
 //
 
     // run me!!!
-    //StepperMotor_Demo();
+    StepperMotor_Demo();
 
     module StepperMotor_Demo() {
+        
+        profile1 = StepperMotorProfile( nemaModel="NEMA17" );
+        generateMotorAndPanel( profile1 );
+        
         // Wantai 57BYGH420-2
         // https://www.sparkfun.com/products/13656
         // https://www.openimpulse.com/blog/wp-content/uploads/wpsc/downloadables/57BYGH420-Stepper-Motor-Datasheet.pdf
-        profile1 = StepperMotorProfile(
+        profile2 = StepperMotorProfile(
             bodyDiameter=56.4, bodyLength=56, shaftDiameter=6.35, shaftLength=21-1.6,
             boltDiameter=5, boltLength=10, boltToBoltDistance=47.14,
             frontCylinderDiameter=38.1, frontCylinderLength=1.6,
             frontFlangeLength=4.8, bodyTaper=1 );
-        profile2 = StepperMotorProfile( nemaModel="NEMA17" );
+        translate( [100,0,0] )
+            generateMotorAndPanel( profile2 );
+        
         // with gear, bolts on gear
-        profile3 = StepperMotorProfile(
-            bodyDiameter=50, bodyLength=70, shaftDiameter=8, shaftLength=20,
-            boltDiameter=3, boltLength=20, boltToBoltDistance=20,
-            frontCylinderDiameter=40, frontCylinderLength=30,
-            frontFlangeLength=10, backFlangeLength=0, 
-            backShaftLength=20 );
-        // with gear, bolts on body
-        profile4 = StepperMotorProfile(
-            bodyDiameter=50, bodyLength=80, shaftDiameter=8, shaftLength=20,
+        profile3 = StepperMotorProfile( nemaModel="NEMA23",
+            boltToBoltDistance=20,
+            frontCylinderDiameter=40, frontCylinderLength=30 );
+        translate( [200,0,0] )
+            generateMotorAndPanel( profile3 );
+            
+        // with gear, bolts on body, back cylinder and shaft
+        // bigger panel hole
+        profile4 = StepperMotorProfile( nemaModel="NEMA23",
             boltDiameter=8, boltLength=25+8, // go below frontCylinderLength
             boltToBoltDistance=38,
             frontCylinderDiameter=40, frontCylinderLength=25,
             panelHoleDiameter=40+2, // larger than frontCylinderDiameter
-            backCylinderDiameter=40, backCylinderLength=10
-        );
-        // motor 1
-        generateMotorAndPanel( profile1 );
-        // motor 2
-        translate( [100,0,0] )
-            generateMotorAndPanel( profile2 );
-        // motor 3
-        translate( [200,0,0] )
-            generateMotorAndPanel( profile3 );
-        // motor 4
+            backCylinderDiameter=40, backCylinderLength=20, backShaftLength=20 );
         translate( [300,0,0] ) {
             // position to upper flange
             translate( [0,0, kvGet(profile4,"length.frontCylinder")] )
@@ -61,17 +57,19 @@ include <utility.scad>
             translate( [0,-100,0] )
                 generatePanel( profile4 );
         }
-        // motor 2B, 2C
+        
+        // position to lower shaft
         translate( [400,0,0] ) {
-            // position to lower shaft
             translate( [0,0,kvGet(profile3,"length.body")] )
                 StepperMotor( profile3 );
         }
+        
+        // position to bottom of body, excluding lower cylinder
         translate( [500,0,0] ) {
-            // position to bottom of body, excluding lower cylinder        
             translate( [0,0,kvGet(profile4,"length.body")-kvGet(profile4,"length.backCylinder")] )
                 StepperMotor( profile4 );
         }
+        
         module generateMotorAndPanel( profile ) {
             StepperMotor( profile );
             translate( [0,-100,0] )
