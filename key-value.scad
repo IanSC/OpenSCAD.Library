@@ -12,7 +12,7 @@ include <utility.scad>
 //
 
     // run me!!!
-    KeyValue_Demo();
+    //KeyValue_Demo();
 
     module KeyValue_Demo() {
         table = KeyValue([
@@ -121,6 +121,13 @@ include <utility.scad>
         kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultValue,failIfMissing=false);
 
     // optional key:
+    // - return defaultValue, if keyValues in undef
+    // - return defaultValue, if key is missing
+    // - return defaultValue, if found and value is undef
+    function kvSearchLax(keyValues,key,defaultValue=undef) =
+        kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultValue,failIfMissing=false,failIfNoTable=false);
+
+    // optional key:
     // - return defaultMissing, if key is missing
     // - return defaultValue,   if found and value is undef
     function kvSearchOCD(keyValues,key,defaultValue=undef,,defaultMissing=undef) =
@@ -131,11 +138,11 @@ include <utility.scad>
         r = kvFindCore(keyValues,key,defaultValue=true,defaultMissing=undef,failIfMissing=false)
     ) (r!=undef);
 
-    function kvFindCore(keyValues,key,defaultValue=undef,defaultMissing=undef,failIfMissing=true) =
+    function kvFindCore(keyValues,key,defaultValue=undef,defaultMissing=undef,failIfMissing=true,failIfNoTable=true) =
         let (
             
             has=false,
-            e1=(keyValues==undef||!is_list(keyValues)?assert(has,"table not specified"):0),
+            e1=(failIfNoTable&&(keyValues==undef||!is_list(keyValues))?assert(has,"table not specified"):0),
             e2=(key      ==undef?assert(has,"key not specified" ):0),
 
             FindCore = function(table,tIndex,keywords,kIndex)
@@ -162,7 +169,7 @@ include <utility.scad>
                     FindCore(table,tIndex+1,keywords,kIndex)
                 ),
 
-            keywords = strsplit(key,"."),
+            keywords = stringSplit(key,"."),
             result   = FindCore(keyValues,0,keywords,0)
         )
         result;
@@ -174,7 +181,7 @@ include <utility.scad>
     module kvEcho(keyValues) {
         echo( show(keyValues,"") );        
         function show(a,indent) =
-            strcat([
+            stringJoin([
                 for( i=[0:len(a)-1] )
                 ( is_list(a[i][1]) ) ?            
                     str( "\n", indent, key(a[i][0]), " =", show(a[i][1],str(indent,"   ")) )

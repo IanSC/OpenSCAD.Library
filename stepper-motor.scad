@@ -93,7 +93,7 @@ include <utility.scad>
     // to use: specify nemaModel while building the motor profile and defaults will be used
     // profile = StepperMotorProfile( nemaModel="NEMA23", bodyLength=50 );
 
-    function NemaFrameSizeBuildProfile(
+    function NemaFrameProfile(
         model,
         boltDistance,    // bolt to bolt distance
         defBodyDiameter,
@@ -122,15 +122,15 @@ include <utility.scad>
     // NEMA8=?, NEMA11=28mm, NAME14=35mm, NEMA16=40, NEMA17=42, NEMA23=56mm?, NEMA24=60mm, NEMA34=86mm, NEMA42=106mm
 
     NemaFrameSizes = KeyValue( [
-        "NEMA8",  NemaFrameSizeBuildProfile( model="NEMA8" , boltDistance=16   , defBodyDiameter=0.8*25.4, defBodyLength=0.8*25.4, defShaftDiameter= 4   , defShaftLength=10, defBoltDiameter=2.5 ),        
-        "NEMA11", NemaFrameSizeBuildProfile( model="NEMA11", boltDistance=23   , defBodyDiameter=1.1*25.4, defBodyLength=1.1*25.4, defShaftDiameter= 5   , defShaftLength=10, defBoltDiameter=2.5 ),
-        "NEMA14", NemaFrameSizeBuildProfile( model="NEMA14", boltDistance=26   , defBodyDiameter=1.4*25.4, defBodyLength=1.4*25.4, defShaftDiameter= 5   , defShaftLength=20, defBoltDiameter=3   ),
-        "NEMA16", NemaFrameSizeBuildProfile( model="NEMA16", boltDistance=31   , defBodyDiameter=1.6*25.4, defBodyLength=1.6*25.4, defShaftDiameter= 5   , defShaftLength=24, defBoltDiameter=3   ),
-        "NEMA17", NemaFrameSizeBuildProfile( model="NEMA17", boltDistance=31   , defBodyDiameter=1.7*25.4, defBodyLength=1.7*25.4, defShaftDiameter= 5   , defShaftLength=24, defBoltDiameter=3   ),
-        "NEMA23", NemaFrameSizeBuildProfile( model="NEMA23", boltDistance=47.14, defBodyDiameter=2.3*25.4, defBodyLength=2.3*25.4, defShaftDiameter= 6.35, defShaftLength=20, defBoltDiameter=4   ),
-        "NEMA24", NemaFrameSizeBuildProfile( model="NEMA24", boltDistance=47.14, defBodyDiameter=2.4*25.4, defBodyLength=2.4*25.4, defShaftDiameter= 6.35, defShaftLength=20, defBoltDiameter=4   ),
-        "NEMA34", NemaFrameSizeBuildProfile( model="NEMA34", boltDistance=69.6 , defBodyDiameter=3.4*25.4, defBodyLength=3.4*25.4, defShaftDiameter=14   , defShaftLength=30, defBoltDiameter=4   ),
-        "NEMA42", NemaFrameSizeBuildProfile( model="NEMA42", boltDistance=88.9 , defBodyDiameter=4.2*25.4, defBodyLength=4.2*25.4, defShaftDiameter=16   , defShaftLength=35, defBoltDiameter=4   )
+        "NEMA8",  NemaFrameProfile( model="NEMA8" , boltDistance=16   , defBodyDiameter=0.8*25.4, defBodyLength=0.8*25.4, defShaftDiameter= 4   , defShaftLength=10, defBoltDiameter=2.5 ),        
+        "NEMA11", NemaFrameProfile( model="NEMA11", boltDistance=23   , defBodyDiameter=1.1*25.4, defBodyLength=1.1*25.4, defShaftDiameter= 5   , defShaftLength=10, defBoltDiameter=2.5 ),
+        "NEMA14", NemaFrameProfile( model="NEMA14", boltDistance=26   , defBodyDiameter=1.4*25.4, defBodyLength=1.4*25.4, defShaftDiameter= 5   , defShaftLength=20, defBoltDiameter=3   ),
+        "NEMA16", NemaFrameProfile( model="NEMA16", boltDistance=31   , defBodyDiameter=1.6*25.4, defBodyLength=1.6*25.4, defShaftDiameter= 5   , defShaftLength=24, defBoltDiameter=3   ),
+        "NEMA17", NemaFrameProfile( model="NEMA17", boltDistance=31   , defBodyDiameter=1.7*25.4, defBodyLength=1.7*25.4, defShaftDiameter= 5   , defShaftLength=24, defBoltDiameter=3   ),
+        "NEMA23", NemaFrameProfile( model="NEMA23", boltDistance=47.14, defBodyDiameter=2.3*25.4, defBodyLength=2.3*25.4, defShaftDiameter= 6.35, defShaftLength=20, defBoltDiameter=4   ),
+        "NEMA24", NemaFrameProfile( model="NEMA24", boltDistance=47.14, defBodyDiameter=2.4*25.4, defBodyLength=2.4*25.4, defShaftDiameter= 6.35, defShaftLength=20, defBoltDiameter=4   ),
+        "NEMA34", NemaFrameProfile( model="NEMA34", boltDistance=69.6 , defBodyDiameter=3.4*25.4, defBodyLength=3.4*25.4, defShaftDiameter=14   , defShaftLength=30, defBoltDiameter=4   ),
+        "NEMA42", NemaFrameProfile( model="NEMA42", boltDistance=88.9 , defBodyDiameter=4.2*25.4, defBodyLength=4.2*25.4, defShaftDiameter=16   , defShaftLength=35, defBoltDiameter=4   )
     ] );
 
 //
@@ -157,13 +157,13 @@ include <utility.scad>
     
         nemaData = ( nemaModel==undef || nemaModel=="" ? undef : kvSearch( NemaFrameSizes, nemaModel ) ),
         
-        eNemaModel     = sel( nemaModel,          ""                                 ),
-        eBodyDiameter  = sel( bodyDiameter,       kvSearch(nemaData,"bodyDiameter" ) ),
-        eBodyLength    = sel( bodyLength,         kvSearch(nemaData,"bodyLength"   ) ),
-        eShaftDiameter = sel( shaftDiameter,      kvSearch(nemaData,"shaftDiameter") ),
-        eShaftLength   = sel( shaftLength,        kvSearch(nemaData,"shaftLength"  ) ),
-        eBoltDiameter  = sel( boltDiameter,       kvSearch(nemaData,"boltDiameter" ), 0 ),
-        eB2BDistance   = sel( boltToBoltDistance, kvSearch(nemaData,"boltDistance" ), eBodyDiameter*0.8 ),
+        eNemaModel     = sel( nemaModel,          ""                                  ),
+        eBodyDiameter  = sel( bodyDiameter,       kvSearchLax(nemaData,"bodyDiameter" ) ),
+        eBodyLength    = sel( bodyLength,         kvSearchLax(nemaData,"bodyLength"   ) ),
+        eShaftDiameter = sel( shaftDiameter,      kvSearchLax(nemaData,"shaftDiameter") ),
+        eShaftLength   = sel( shaftLength,        kvSearchLax(nemaData,"shaftLength"  ) ),
+        eBoltDiameter  = sel( boltDiameter,       kvSearchLax(nemaData,"boltDiameter" ), 0 ),
+        eB2BDistance   = sel( boltToBoltDistance, kvSearchLax(nemaData,"boltDistance" ), eBodyDiameter*0.8 ),
 
         // if not specified assume shaftDiameter + 2mm
         ePanelHoleDiameter = sel( panelHoleDiameter,  eShaftDiameter+2 ),

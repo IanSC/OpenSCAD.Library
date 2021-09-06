@@ -1,49 +1,156 @@
 # OpenSCAD.Library
-
 ---
 ### String
-**strcat()**: concatenate string list  
-**strsplit()**: split string to list  
-**substr()**: extract characters from list (start,length)  
-**substr2()**: extract characters from list (start,end)
+**stringJoin(** list, separator="" **)**: concatenate list of strings  
+**stringSplit(** string, breaker="." **)**: split string to list  
+**stringLeft(** string, length **)**: extract characters from the left  
+**stringRight(** string, length **)**: extract characters from the right  
+**stringMid(** string, start, length **)**: extract characters by start position and length  
+**stringExtract(** string, start, end **)**: extract characters by start and end positions
+<style>
+td, th {
+   border: none!important;
+}
+</style>
+<table>
+<tr>
+<td><b>stringJoin</b>( list, separator="" )</td>
+<td>concatenate list of strings</td>
+</tr>
+<tr>
+<td><b>stringSplit</b>( string, breaker="." )</td>
+<td>split string to list</td>
+</tr>
+<tr>
+<td><b>stringLeft</b>( string, length )</td>
+<td>extract characters from the left</td>
+</tr>
+<tr>
+<td><b>stringRight</b>( string, length )</td>
+<td>extract characters from the right</td>
+</tr>
+<tr>
+<td><b>stringMid</b>( string, start, length )</td>
+<td>extract characters by start position and length</td>
+</tr>
+<tr>
+<td><b>stringExtract</b>( string, start, end )</td>
+<td>extract characters by start and end positions</td>
+</tr>
+</table>
 
 <details>
-  <summary>&nbsp; &nbsp;<i>strcat() sample</i></summary>
+  <summary>&nbsp; &nbsp;<i>string samples</i></summary>
+
+<table>
+<td>
+
+c++  
+int foo() {  
+    int result = 4;  
+    return result;  
+}
+</td>
+<td>
+
+```c++
+int foo() { 
+    int x = 4;
+    return x;
+}
+```
+
+</td>
+</table>
+
+```
+echo("\n\n stringJoin():");
+a = [ "apple", "banana", "carrot" ];
+echo( str       ( a      ) ); // ["apple","banana","carrot"]
+echo( stringJoin( a      ) ); // "applebananacarrot"
+echo( stringJoin( a, "-" ) ); // "apple-banana-carrot"
+b = [ 1, 22, 333 ];
+echo( stringJoin( b      ) ); // "122333"
+echo( stringJoin( b, "-" ) ); // "1-22-333"
+
+echo("\n\n stringSplit():");
+echo( stringSplit( "apple"        , "." ) ); // ["apple"]
+echo( stringSplit( "a.bb.ccc.dddd", "." ) ); // ["a","bb","ccc","dddd"]
+
+echo("\n\n stringLeft(length):");            // "television"
+echo(    stringLeft( "television", 1 ) );    // "t"
+echo(    stringLeft( "television", 4 ) );    // "tele"
+
+echo("\n\n stringRight(length):");           // "television"
+echo(   stringRight( "television", 4 ) );    //       "sion"
+echo(   stringRight( "television", 6 ) );    //     "vision"
+
+echo("\n\n stringMid(position,length):");    // "television"
+echo(     stringMid( "television", 0, 4 ) ); // "tele"
+echo(     stringMid( "television", 4, 6 ) ); //     "vision"
+echo(     stringMid( "television", 4, 5 ) ); //     "visio"
+
+echo("\n\n stringExtract(start,end):");      // "television"
+echo( stringExtract( "television", 0, 3 ) ); // "tele"
+echo( stringExtract( "television", 4, 9 ) ); //     "vision"
+echo( stringExtract( "television", 4, 5 ) ); //     "vi"
+```
+</details>
+
+
+<details>
+  <summary>&nbsp; &nbsp;<i>stringJoin() sample</i></summary>
 
 ```
 a = ["apple","banana","carrot"];
-echo( str   (a    ) ); // ["apple","banana","carrot"]
-echo( strcat(a    ) ); // "applebananacarrot"
-echo( strcat(a,"-") ); // "apple-banana-carrot"
+echo( str       (a    ) ); // ["apple","banana","carrot"]
+echo( stringJoin(a    ) ); // "applebananacarrot"
+echo( stringJoin(a,"-") ); // "apple-banana-carrot"
 b = [1,22,333];
-echo( strcat(b    ) ); // "122333"
-echo( strcat(b,"-") ); // "1-22-333"
+echo( stringJoin(b    ) ); // "122333"
+echo( stringJoin(b,"-") ); // "1-22-333"
 ```
 </details>
 <details>
-  <summary>&nbsp; &nbsp;<i>strsplit() sample</i></summary>
+  <summary>&nbsp; &nbsp;<i>stringSplit() sample</i></summary>
 
 ```
-echo( strsplit( "apple"         ) ); // ["apple"]
-echo( strsplit( "a.bb.ccc.dddd" ) ); // ["a","bb","ccc","dddd"]
+echo( stringSplit( "apple"        , "." ) ); // ["apple"]
+echo( stringSplit( "a.bb.ccc.dddd", "." ) ); // ["a","bb","ccc","dddd"]
 ```
 </details>
 <details>
-  <summary>&nbsp; &nbsp;<i>substr() sample</i></summary>
+  <summary>&nbsp; &nbsp;<i>stringLeft() sample</i></summary>
 
 ```
-echo( substr( "television"       ) ); // "television"
-echo( substr( "television", 4    ) ); // "vision"
-echo( substr( "television", 4, 5 ) ); // "visio"
+echo( stringLeft( "television",   4 ) ); // "tele"
+echo( stringLeft( "television", 100 ) ); // "television"
 ```
 </details>
 <details>
-  <summary>&nbsp; &nbsp;<i>substr2() sample</i></summary>
+  <summary>&nbsp; &nbsp;<i>stringRight() sample</i></summary>
 
 ```
-echo( substr2( "television"       ) ); // "television"
-echo( substr2( "television", 4    ) ); // "vision"
-echo( substr2( "television", 4, 5 ) ); // "vi"
+echo( stringRight( "television",   6 ) ); // "vision"
+echo( stringRight( "television", 100 ) ); // "television"
+```
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>stringMid() sample</i></summary>
+
+```
+echo( stringMid( "television"       ) ); // "television"
+echo( stringMid( "television", 4    ) ); // "vision"
+echo( stringMid( "television", 4, 5 ) ); // "visio"
+```
+</details>
+<details>
+  <summary>&nbsp; &nbsp;<i>stringExtract() sample</i></summary>
+
+```
+echo( stringExtract( "television"       ) ); // "television"
+echo( stringExtract( "television", 4    ) ); // "vision"
+echo( stringExtract( "television", 4, 5 ) ); // "vi"
 ```
 </details>
 
@@ -109,7 +216,7 @@ echo( listRunningSum(a) );   // [1, 3, 6, 10, 15]
 **KeyValue()**: create table  
 **kvKeys()**: get keys  
 **kvValues()**: get values  
-**kvExists()**: check if keys exists  
+**kvExists()**: check if key exists  
 **kvShow()**: echo to console  
 **kvGet()**: get expected key  
 **kvSearch()**: get optional keys  

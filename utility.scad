@@ -1,4 +1,3 @@
-
 //
 // ERRORS - END EXECUTION
 //
@@ -35,79 +34,101 @@
     //String_Demo(); 
     module String_Demo() {
         
-        echo("\n\nstrcat():");
-        a = ["apple","banana","carrot"];
-        echo( str   (a    ) ); // ["apple","banana","carrot"]
-        echo( strcat(a    ) ); // "applebananacarrot"
-        echo( strcat(a,"-") ); // "apple-banana-carrot"
-        b = [1,22,333];
-        echo( strcat(b    ) ); // "122333"
-        echo( strcat(b,"-") ); // "1-22-333"
+        echo("\n\n stringJoin():");
+        a = [ "apple", "banana", "carrot" ];
+        echo( str       ( a      ) ); // ["apple","banana","carrot"]
+        echo( stringJoin( a      ) ); // "applebananacarrot"
+        echo( stringJoin( a, "-" ) ); // "apple-banana-carrot"
+        b = [ 1, 22, 333 ];
+        echo( stringJoin( b      ) ); // "122333"
+        echo( stringJoin( b, "-" ) ); // "1-22-333"
 
-        echo("\n\nstrsplit():");
-        echo( strsplit( "apple"         ) ); // ["apple"]
-        echo( strsplit( "a.bb.ccc.dddd" ) ); // ["a","bb","ccc","dddd"]
+        echo("\n\n stringSplit():");
+        echo( stringSplit( "apple"        , "." ) ); // ["apple"]
+        echo( stringSplit( "a.bb.ccc.dddd", "." ) ); // ["a","bb","ccc","dddd"]
         
-        echo("\n\nsubstr(start,length):");
-        echo( substr( "television"       ) ); // "television"
-        echo( substr( "television", 4    ) ); // "vision"
-        echo( substr( "television", 4, 5 ) ); // "visio"
+        echo("\n\n stringLeft(s,length):");          // "television"
+        echo(    stringLeft( "television", 1 ) );    // "t"
+        echo(    stringLeft( "television", 4 ) );    // "tele"
         
-        echo("\n\nsubstr2(start,end):");
-        echo( substr2( "television"       ) ); // "television"
-        echo( substr2( "television", 4    ) ); // "vision"
-        echo( substr2( "television", 4, 5 ) ); // "vi"
+        echo("\n\n stringRight(s,length):");         // "television"
+        echo(   stringRight( "television", 4 ) );    //       "sion"
+        echo(   stringRight( "television", 6 ) );    //     "vision"
+        
+        echo("\n\n stringMid(s,position,length):");  // "television"
+        echo(     stringMid( "television", 0, 4 ) ); // "tele"
+        echo(     stringMid( "television", 4, 6 ) ); //     "vision"
+        echo(     stringMid( "television", 4, 5 ) ); //     "visio"
+        
+        echo("\n\n stringExtract(s,start,end):");    // "television"
+        echo( stringExtract( "television", 0, 3 ) ); // "tele"
+        echo( stringExtract( "television", 4, 9 ) ); //     "vision"
+        echo( stringExtract( "television", 4, 5 ) ); //     "vi"
     }
 
     // concatenate string with optional separator
-    function strcat(list,separator="",index=0) =
-        ( len(list)-1==index ) ? list[index] :
-            str( list[index], separator, strcat(list,separator,index+1) );
-        //echo( str   (  "a","bb","ccc"  ) ); // "abbccc"
-        //echo( str   ( ["a","bb","ccc"] ) ); // ["a","bb","ccc"] not what we want
-        //echo( strcat( ["a","bb","ccc"] ) ); // "abbccc"
-        //echo( strcat( [ 1,  22,  333 ] ) ); // "122333"
+    function stringJoin(list,separator="") = let(
+        core = function(list,separator,index=0)
+            ( len(list)-1==index )
+                ? list[index]
+                : str( list[index], separator, core(list,separator,index+1) )    
+    )   (list==undef || !is_list(list))
+            ? undef
+            : core(list,separator);
 
-    // split string based on breaker
-    function strsplit(string,breaker=".") =
-        let (
-            pos = search(breaker,string,0)[0],
-            // search( ".", "aa.bb.cc.dd", 0 ) ==> [[2,5,8]]
-            ext = concat(
-                0,                               // 0
-                [ for(i=pos) each([i-1,i+1]) ],  // pos-1, pos+1
-                len(string)-1                    // M
+    // split string based on breaker    
+    function stringSplit(string,breaker=".") = let (
+        core = function(string,breaker)
+            let (
+                pos = search(breaker,string,0)[0],
+                // search( ".", "aa.bb.cc.dd", 0 ) ==> [[2,5,8]]
+                ext = concat(
+                    0,                               // 0
+                    [ for(i=pos) each([i-1,i+1]) ],  // pos-1, pos+1
+                    len(string)-1                    // M
+                )
+                // extract [0:pos1-1],[pos1+1:pos2-1]...[posN+1,M]
             )
-            // extract [0:pos1-1],[pos1+1:pos2-1]...[posN+1,M]
-        )
-        ( len(pos)==0 ) ? [string] : 
-            [ for(i=[0:2:len(ext)-1]) substr2(string,ext[i],ext[i+1]) ];
-        //echo( strsplit( "apple"         ) ); // ["apple"]
-        //echo( strsplit( "a.bb.ccc.dddd" ) ); // ["a","bb","ccc","dddd"] 
+            ( len(pos)==0 )
+                ? [string]
+                : [ for(i=[0:2:len(ext)-1]) 
+                    //stringExtract(string,ext[i],ext[i+1])
+                    stringJoin( [ for(j=[ext[i]:ext[i+1]]) string[j] ] )
+                  ]
+    )   (string==undef||breaker==undef)
+            ? undef
+            : core(string,breaker);
+
+    // extract subtring from left
+    function stringLeft(string,length) =
+        (string==undef||length==undef) ? undef
+        :(length<=0) ? ""
+            : let(sl=len(string),eLength=(length==undef||length>sl)?sl:length)
+              stringJoin( [ for(i=[0:eLength-1]) string[i] ] );
+
+    // extract subtring from right
+    function stringRight(string,length) =
+        (string==undef||length==undef) ? undef
+        :(length<=0) ? ""
+            : let(sl=len(string),eLength=(length==undef||length>sl)?sl:length)
+              stringJoin( [ for(i=[sl-eLength:sl-1]) string[i] ] );
 
     // extract subtring based on start position and length
-    function substr(string,start=0,length) =
-        (length==undef)?
-            strcat( [ for(i=[start:len(string)-1]) string[i] ] )
-        :(length<=0)?
-            ""
-        :
-            strcat( [ for(i=[start:start+length-1]) string[i] ] );
-        //echo( substr( "television"       ) ); // "television"
-        //echo( substr( "television", 4    ) ); // "vision"
-        //echo( substr( "television", 4, 5 ) ); // "visio"
+    function stringMid(string,start=0,length) =
+        (string==undef)?undef:
+            let(eLength=(length==undef)?len(string):length)
+            stringExtract(string,start,start+eLength-1);
 
     // extract subtring based on start and end positions
-    function substr2(string,start=0,end) =
-        (end==undef)?
-            strcat( [ for(i=[start:len(string)-1]) string[i] ] )
-        :(end<start)?
-            ""
-        :
-            strcat( [ for(i=[start:end]) string[i] ] );
-        //echo( substr2( "television"       ) ); // "television"
-        //echo( substr2( "television", 4    ) ); // "vision"
-        //echo( substr2( "television", 4, 5 ) ); // "vi"
+    function stringExtract(string,start=0,end) = let (
+        // auto assign start and limit to 0 if negative
+        eStart = (start==undef||start<0) ? 0 : start
+    )
+        (string==undef)?undef
+        // auto assign end and limit to end if beyond
+        : let(sl=len(string),eEnd=(end==undef||end>sl-1)?sl-1:end)
+          (eEnd<eStart)?undef
+          : stringJoin( [ for(i=[eStart:eEnd]) string[i] ] );
 
 //
 // NUMBERS
@@ -184,11 +205,11 @@
     }
     
     function listSum(list,start=0,end) = let (
+        // auto assign start and limit to 0 if negative
+        eStart = (start==undef||start<0) ? 0 : start,
         // auto assign end and limit to end if beyond
         eEnd = (end==undef||end>len(list)-1)
             ? len(list)-1 : end,
-        // auto assign start and limit to 0 if negative
-        eStart = (start==undef||start<0) ? 0 : start,
         core = function(index)
             list[index] + ( (index>=eEnd)?0
                             :core(index+1) )
