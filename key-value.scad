@@ -12,9 +12,10 @@ include <utility.scad>
 //
 
     // run me!!!
-    //KeyValue_Demo();
+    KeyValue_Demo();
 
     module KeyValue_Demo() {
+
         table = KeyValue([
             "solo"   , 0,
             "notSure", undef,
@@ -30,17 +31,20 @@ include <utility.scad>
             "model", "ABC123"
         ]);
         
+        echo( "\n\n ECHO: kvEcho()" );
         kvEcho( table );
+
+        echo( "\n\n KEYS/VALUES: kvKeys()/kvValues()" );
         echo( kvKeys  ( table ) );          // ["solo", "notSure", "fruit", "color", "animal", "model"]
         echo( kvKeys  ( table, "color" ) ); // ["red", "green", "blue"]
         echo( kvValues( table, "fruit" ) ); // [1, 2, 3]
         
-        echo( "\n\nKEYS EXISTS:" );
+        echo( "\n\n KEYS EXISTS: kvExists()" );
         echo( kvExists( table, "solo" ) );                    // true
         echo( kvExists( table, "animal.dog.breed.poodle" ) ); // true
         echo( kvExists( table, "animal.dog.breed.bulldog" ) ); // false
         
-        echo( "\n\nEXPECTED KEYS:" );
+        echo( "\n\n EXPECTED KEYS: kvGet()" );
         echo( kvGet( table, "solo" ) );                   // 0
         echo( kvGet( table, "notSure" ) );                // undef
         echo( kvGet( table, "fruit.apple" ) );            // 1
@@ -50,40 +54,46 @@ include <utility.scad>
         //echo( kvGet( table, "missingKey" ) );           // ERROR: "[missingKey] missing"
         //echo( kvGet( table, "fruit.dragon" ) );         // ERROR: "[dragon] in [fruit.dragon] missing"
 
-        echo( "\n\nINNER TABLE:" );
+        echo( "\n\n INNER TABLE:" );
         animalTable = kvGet( table, "animal" );
         echo( kvGet( animalTable, "cat.breed.siamese" ) );         // 50
 
-        echo( "\n\nDEFAULT VALUES:" );
+        echo( "\n\n DEFAULT VALUES:" );
         echo( kvGet( table, "notSure" ) );                         // undef
         echo( kvGet( table, "notSure",      defaultValue=true ) ); // true
-        //echo( kvGet( table, "missingKey", defaultValue=1 ) );    // ERROR: "[missingKey] missing"
+        //echo( kvGet( table, "missingKey", defaultValue=1    ) ); // ERROR: "[missingKey] missing"
 
-        // return undef if missing
-        echo( "\n\nOPTIONAL KEYS:" );
+        echo( "\n\n OPTIONAL KEYS: kvSearch()" );
         echo( kvSearch( table, "missingKey" ) );                   // undef
         echo( kvSearch( table, "animal.dragon" ) );                // undef
         echo( kvSearch( table, "Model" ) );                        // undef
         
         echo( kvSearch( table, "missingKey", defaultValue=123 ) ); // 123
         echo( kvSearch( table, "notSure",    defaultValue=123 ) ); // 123
+        //echo( kvSearch( undef, "notSure",  defaultValue=123 ) ); // ERROR: "table not specified"
 
-        echo( "\n\nMISSING vs UNDEF:" );
-        echo( kvSearchOCD( table, 
-            "missingKey",                                   defaultValue="dunno" ) );   // undef
-        echo( kvSearchOCD( table, 
-            "notSure",
-                                                            defaultValue="dunno" ) );   // "dunno"
-        echo( kvSearchOCD( table, 
-            "missingKey",         defaultMissing="missing"                       ) );   // "missing"
-        echo( kvSearchOCD( table, 
-            "notSure",            defaultMissing="missing"                       ) );   // undef
-        echo( kvSearchOCD( table, 
-            "missingKey",         defaultMissing="missing", defaultValue="dunno" ) );   // "missing"
-        echo( kvSearchOCD( table, 
-            "notSure",            defaultMissing="missing", defaultValue="dunno" ) );   // "dunno"
+        echo( "\n\n OPTIONAL TABLE: kvSearchLax()" );
+        echo( kvSearchLax( undef        ) );                       // undef
+        echo( kvSearchLax( table, undef ) );                       // undef
+
+        echo( "\n\n MISSING vs UNDEF: kvSearchOCD()" );
+        echo( kvSearchOCD( table, "missingKey", defaultValue="dunno"                         ) ); //  undef
+        echo( kvSearchOCD( table, "notSure"   , defaultValue="dunno"                         ) ); // "dunno"
+        echo( kvSearchOCD( table, "missingKey",                       ifKeyMissing="missing" ) ); // "missing"
+        echo( kvSearchOCD( table, "notSure"   ,                       ifKeyMissing="missing" ) ); //  undef
+        echo( kvSearchOCD( table, "missingKey", defaultValue="dunno", ifKeyMissing="missing" ) ); // "missing"
+        echo( kvSearchOCD( table, "notSure"   , defaultValue="dunno", ifKeyMissing="missing" ) ); // "dunno"
+
+        echo( "\n\n FUNCTION" );
+        mathPack = KeyValue([
+            "+", function(x,y) x+y,
+            "-", function(x,y) x-y,
+            "x", function(x,y) x*y,
+            "/", function(x,y) x/y
+        ]);
+        echo( kvGet(mathPack,"+")(10,20) ); // 30
+        echo( kvGet(mathPack,"x")(10,20) ); // 200
     }
-
 
 //
 // CREATE
@@ -94,13 +104,13 @@ include <utility.scad>
         // output = [ ["a",1] , ["b",2] , ["c",3] ]
         [ for(i=[0:2:len(list)-1]) [ list[i], list[i+1] ] ];
 
-    function kvKeys(keyValues,key=undef) = let (
-            kv = (key==undef)?keyValues:kvGet(keyValues,key)        
+    function kvKeys(table,key=undef) = let (
+            kv = (key==undef)?table:kvGet(table,key)        
         )
         [ for(i=kv) i[0] ];
             
-    function kvValues(keyValues,key=undef) = let (
-            kv = (key==undef)?keyValues:kvGet(keyValues,key)        
+    function kvValues(table,key=undef) = let (
+            kv = (key==undef)?table:kvGet(table,key)        
         )
         [ for(i=kv) i[1] ];
 
@@ -109,41 +119,43 @@ include <utility.scad>
 //
 
     // key is expected to exist:
-    // - fail if missing
-    // - return defaultValue, if found and value is undef
-    function kvGet(keyValues,key,defaultValue=undef) =
-        kvFindCore(keyValues,key,defaultValue=defaultValue,failIfMissing=true);
+    // - fail if key is missing
+    // - return defaultValue, if found value is undef
+    function kvGet(table,key,defaultValue=undef) =
+        kvFindCore(table,key,defaultValue=defaultValue,failIfMissing=true);
 
     // optional key:
     // - return defaultValue, if key is missing
-    // - return defaultValue, if found and value is undef
-    function kvSearch(keyValues,key,defaultValue=undef) =
-        kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultValue,failIfMissing=false);
+    // - return defaultValue, if found value is undef
+    function kvSearch(table,key,defaultValue=undef) =
+        kvFindCore(table,key,defaultValue=defaultValue,ifKeyMissing=defaultValue,failIfMissing=false);
 
     // optional key:
-    // - return defaultValue, if keyValues in undef
+    // - return defaultValue, if table is undef
     // - return defaultValue, if key is missing
-    // - return defaultValue, if found and value is undef
-    function kvSearchLax(keyValues,key,defaultValue=undef) =
-        kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultValue,failIfMissing=false,failIfNoTable=false);
+    // - return defaultValue, if found value is undef
+    function kvSearchLax(table,key,defaultValue=undef) =
+        kvFindCore(table,key,defaultValue=defaultValue,ifKeyMissing=defaultValue,failIfMissing=false,failIfNoTable=false);
 
     // optional key:
     // - return defaultMissing, if key is missing
-    // - return defaultValue,   if found and value is undef
-    function kvSearchOCD(keyValues,key,defaultValue=undef,,defaultMissing=undef) =
-        kvFindCore(keyValues,key,defaultValue=defaultValue,defaultMissing=defaultMissing,failIfMissing=false);
+    // - return defaultValue,   if found value is undef
+    function kvSearchOCD(table,key,defaultValue=undef,ifKeyMissing=undef) =
+        kvFindCore(table,key,defaultValue=defaultValue,ifKeyMissing=ifKeyMissing,failIfMissing=false);
 
     // check if key exists
-    function kvExists(keyValues,key) = let(
-        r = kvFindCore(keyValues,key,defaultValue=true,defaultMissing=undef,failIfMissing=false)
+    function kvExists(table,key) = let(
+        r = kvFindCore(table,key,defaultValue=true,ifKeyMissing=undef,failIfMissing=false)
     ) (r!=undef);
 
-    function kvFindCore(keyValues,key,defaultValue=undef,defaultMissing=undef,failIfMissing=true,failIfNoTable=true) =
+    function kvFindCore(table,key,defaultValue=undef,ifKeyMissing=undef,failIfMissing=true,failIfNoTable=true) =
         let (
             
             has=false,
-            e1=(failIfNoTable&&(keyValues==undef||!is_list(keyValues))?assert(has,"table not specified"):0),
-            e2=(key      ==undef?assert(has,"key not specified" ):0),
+            e1=( failIfNoTable && (table==undef||!is_list(table) ) ?
+                assert(has,"table not specified") : 0 ),
+            e2=( failIfMissing && key==undef ?
+                assert(has,"key not specified" ) : 0 ),
 
             FindCore = function(table,tIndex,keywords,kIndex)
                 ( table[tIndex][0]==keywords[kIndex] ) ? (
@@ -163,23 +175,23 @@ include <utility.scad>
                         :
                             assert(has,str( "[", keywords[kIndex], "] in [", key, "] missing" ))
                     ) :
-                        defaultMissing
+                        ifKeyMissing
                 ) : (
                     // check next entry
                     FindCore(table,tIndex+1,keywords,kIndex)
-                ),
-
+                )
+        ) (table==undef||key==undef)?defaultValue
+        :let(
             keywords = stringSplit(key,"."),
-            result   = FindCore(keyValues,0,keywords,0)
-        )
-        result;
+            result   = FindCore(table,0,keywords,0)
+        ) result;
 
 //
 // ECHO
 //
 
-    module kvEcho(keyValues) {
-        echo( show(keyValues,"") );        
+    module kvEcho(table) {
+        echo( show(table,"") );        
         function show(a,indent) =
             stringJoin([
                 for( i=[0:len(a)-1] )
