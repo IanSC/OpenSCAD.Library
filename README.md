@@ -4,6 +4,8 @@
 ### Utilities
 Various basic functions.
 
+[a relative link](./docs/utility.md)
+
 <!--section Utilities.String-->
 <table>
 <tr><td colspan="2"><h4>String</h4></td></tr>
@@ -887,14 +889,14 @@ translate( [100,0,0] )
 ```
 </details>
 
->|Timing Pulley
--|:-|
-TimingPulleyProfile  |create profile
-TimingPulley         |generate timing pulley
-TimingPulleyConnected|generate connected timing pulleys
-TimingPulleyCenterDistance|calculate distance between pulleys
-TimingPulleyCenterDistanceByModel|calculate distance between pulleys
-TimingPulleyDiameter|calculate diameter of pulley
+| > | Timing Pulley
+|-|:-|
+| TimingPulleyProfile               | create profile
+| TimingPulley                      | generate timing pulley
+| TimingPulleyConnected             | generate connected timing pulleys
+| TimingPulleyCenterDistance        | calculate distance between pulleys
+| TimingPulleyCenterDistanceByModel | calculate distance between pulleys
+| TimingPulleyDiameter              | calculate diameter of pulley
 
 <!--/section-->
 
