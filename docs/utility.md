@@ -1,39 +1,37 @@
 # Utilities
+
 ---
-
-Various basic functions.
-
 ## String
 
-### stringJoin( list, separator )
+#### _stringJoin( list, separator )_
 <table>
 <tr><td>list          <td>list of strings
 <tr><td>separator = ""<td>optional separator between items
 <tr><td><b><i>return  <td>string
 </table>
 
-### stringSplit( string, breaker )
+#### _stringSplit( string, breaker )_
 <table>
 <tr><td>string       <td>string to split
 <tr><td>breaker = "."<td>breaker to use to separate each substring
 <tr><td><b><i>return <td>list of string
 </table>
 
-### stringLeft( string, length )
+#### _stringLeft( string, length )_
 <table>
 <tr><td>string      <td>string to extract from
 <tr><td>length      <td>number of characters to extract from the left
 <tr><td><b><i>return<td>string
 </table>
 
-### stringRight( string, length )
+#### _stringRight( string, length )_
 <table>
 <tr><td>string      <td>string to extract from
 <tr><td>length      <td>number of characters to extract from the right
 <tr><td><b><i>return<td>string
 </table>
 
-### stringMid( string, start, length )
+#### _stringMid( string, start, length )_
 <table>
 <tr><td>string      <td>string to extract from
 <tr><td>start = 0   <td>starting character position to extract
@@ -41,7 +39,7 @@ Various basic functions.
 <tr><td><b><i>return<td>string
 </table>
 
-### stringExtract( string, start, end )
+#### _stringExtract( string, start, end )_
 <table>
 <tr><td colspan="2"><h4>stringExtract( string, start, end )
 <tr><td>string      <td>string to extract from
@@ -50,6 +48,7 @@ Various basic functions.
 <tr><td><b><i>return<td>string
 </table>
 
+---
 
 ```
 echo("\n\n stringJoin(list,separator=\".\"):");
@@ -84,20 +83,17 @@ echo( stringExtract( "television", 4, 9 ) );   //     "vision"
 echo( stringExtract( "television", 4, 5 ) );   //     "vi"
 ```
 
-<!--/section-->
-
-<!--section Utilities.Numbers-->
-
+---
 ## Numbers
 
-### numRound( value, decPlace )
+#### _numRound( value, decPlace )_
 <table>
 <tr><td>value       <td>number to round
 <tr><td>decPlace = 2<td>decimal places to round to
 <tr><td><b><i>return<td>number
 </table>
 
-### numFormat( value, decPlace )
+#### _numFormat( value, decPlace )_
 <table>
 <tr><td>value         <td>number to format
 <tr><td>decPlace = 2  <td>decimal places to round to
@@ -107,6 +103,7 @@ echo( stringExtract( "television", 4, 5 ) );   //     "vi"
 <tr><td><b><i>return  <td>string
 </table>
 
+---
 
 ```
 echo("\n\n numRound(value,decPlace=2):");
@@ -123,13 +120,11 @@ echo( numFormat( n, 4                            ) ); // "123,456,789.1235"
 echo( numFormat( n,    sep1000="`", decPoint="-" ) ); // "123`456`789-12"
 echo( numFormat( n, 4, pos1000=4                 ) ); // "1,2345,6789.1235"
 ```
-<!--/section-->
 
-<!--section Utilities.List Operations-->
-
+---
 ## List Operations
 
-### listSum( list, start=0, end )
+#### _listSum( list, start, end )_
 <table>
 <tr><td>list        <td>list of numbers
 <tr><td>start = 0   <td>starting position to sum
@@ -137,12 +132,12 @@ echo( numFormat( n, 4, pos1000=4                 ) ); // "1,2345,6789.1235"
 <tr><td><b><i>return<td>number
 </table>
 
-### listRunningSum( list )
+#### _listRunningSum( list )_
 <table>
-<tr><td colspan="2"><h4>listRunningSum( list )
 <tr><td>list        <td>list of numbers
 <tr><td><b><i>return<td>list of numbers, output[n]=sum(input[0]:input[n])
 </table>
+---
 
 ```
 echo("\n\n listSum(list,start=0,end):");
