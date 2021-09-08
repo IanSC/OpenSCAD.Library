@@ -18,7 +18,7 @@
 //     PulleyCenterDistance( p1, p2, beltLength )              - calculate center distance between pulleys given length of belt
 //     PulleyCenterDistanceByModel( "T5", 60, "T5", 20, belt )      - ...
 
-include <key-value.scad>
+include <KVTree.scad>
 include <utility.scad>
 
 //
@@ -26,120 +26,74 @@ include <utility.scad>
 //
 
     // run me!!!
-    //Pulley_Demo();
-    //PulleyCompareDiameter_Test();
+    TimingPulley_Demo();
+    //TimingPulleyCompareDiameter_Test();
 
-    module Pulley_Demo() {
+    module TimingPulley_Demo() {
 
-        profile1 = PulleyProfile(
-        
-            toothModel       = "GT2 2mm",
-            toothCount       = 60,
-            beltWidth        = 12,
-            shaftDiameter    = 6,
-        
-            topFlangeInfo    = [ 3,     // offset from computed notched cylinder
-                                 1,     // tapered height
-                                 2      // flat height
+        profile1 = TimingPulleyProfile(
+
+            toothModel         = "GT2 2mm",
+            toothCount         =   60,
+            beltWidth          =   12,
+            shaftDiameter      =    6,
+            topFlangeInfo    = [    3,   // offset notched cylinder diameter
+                                    1,   // tapered height
+                                    2    // flat height
                                ],
-                               
-            bottomFlangeInfo = [ 3, 
-                                 1, 
-                                 2
+            bottomFlangeInfo = [    3,
+                                    1,
+                                    2
                                ],
-                               
-            hubInfo          = [ 20,    // diameter
-                                 15     // height
+            hubInfo          = [   20,   // diameter
+                                   15    // height
+                               ],         
+            nutInfo          = [ "hex",  // hex or square
+                                    3.2, // bolt diameter
+                                    5.7, // nut diameter
+                                    2.7  // thickness
                                ],
-                               
-            nutInfo          = [ "hex", // hex or square
-                                 3.2,   // bolt diameter
-                                 5.7,   // nut diameter
-                                 2.7    // thickness
+            captiveNutsInfo  = [    3,   // number of nuts
+                                  120,   // angle between nuts
+                                    1.2  // offset from shaft (NOT offset from center)
                                ],
-                               
-            captiveNutsInfo  = [ 3,     // number of nuts
-                                 120,   // angle between nuts
-                                 1.2    // offset from shaft (NOT offset from center)
-                               ],
-                               
-            toothWidthTweak  = 0,       // adjustments on teeth for 3D printing
-            toothDepthTweak  = 0
+            toothWidthTweak    =    0.2, // fine tune teeth for 3D printing
+            toothDepthTweak    =    0
             );
-           
+
         translate( [0,0,0] )
-            Pulley( profile1, omitTeeth=true );
-        
-        // detailed but slow
-        translate( [100,0,0] )
-            Pulley( profile1, for3DPrinting=true, autoFlip=true );
+            TimingPulley( profile1, omitTeeth=true );
 
-        //
-        // HOW IT WAS BUILT - internally uses KeyValue
-        //
+        // 3-D PRINTING (detailed but slow)
+        translate( [75,0,0] )
+            TimingPulley( profile1, for3DPrinting=true, autoFlip=true );
 
-        translate( [200,0,0] ) {
-
-            nutKV = KeyValue([ "shape", "hex", "boltDiameter", 3.2, "nutDiameter", 5.7, "thickness", 2.7 ]);
-            captiveNutsKV = KeyValue([ "count", 2, "angleBetweenNuts", 90, "offsetFromShaft", 1.2 ]);
-            pulleyHubCaptiveNuts( 
-                nutKV             = nutKV,
-                captiveNutsKV     = captiveNutsKV,
-                shaftDiameter     = 6,
-                nutInsertionDepth = 7.5, // how deep are nuts inserted, half of hub height
-                boltLength        = 10   // half of hub diameter
-                );
-            
-            translate( [0,0,15] )
-            pulleyHub(
-                20,                       // diameter
-                15,                       // height
-                notchedCylinderDiameter+3 // upper section , smaller so with taper
-            );
-            
-            notchedCylinderDiameter = PulleyDiameter( "GT2 2mm", 20 );
-            
-            flangeInfoKV = KeyValue([ "offset", 3, "taperHeight", 2, "flatHeight", 3 ]);
-            translate( [0,0,40] )
-            pulleyBottomFlange(
-                notchedCylinderDiameter, // notchCylinder diameter, will offset from this
-                flangeInfoKV );
-                
-            translate( [0,0,55] )
-                PulleyNotchedCylinder( toothModel="GT2 2mm", toothCount=20, height=10, shaftDiameter=0 );
-
-            translate( [0,0,75] )
-            pulleyTopFlange(
-                notchedCylinderDiameter, // notchCylinder diameter, will offset from this
-                flangeInfoKV );
-
-        }
-            
-        //
         // CONNECTED PULLEYS
-        //
-        
-        profile2 = PulleyProfile(
+        profile2 = TimingPulleyProfile(
             toothModel="GT2 2mm",
             toothCount=16, beltWidth=12,
             shaftDiameter=6,
-            topFlangeInfo=[3,1,2], bottomFlangeInfo=[3,1,2],      
+            topFlangeInfo=[3,1,2], bottomFlangeInfo=[3,1,2],
             hubInfo=[20,15] );
-        
-        translate( [300,0,0] ) {
-            PulleyConnected( profile1, profile2, beltLength=200, beltWidth=10, reverseDrivenPulley=true );
-            
-            s1 = kvGet(profile1,"shaftDiameter" );
-            cylinder( 150, d=s1, center=true );
-            
-            s2 = kvGet(profile2,"shaftDiameter" );
-            center2center = PulleyCenterDistance( profile1, profile2, beltLength=200 );
-            translate( [center2center,0,0] )
-                cylinder( 150, d=s2, center=true );
+
+        beltLength=200;
+        center2center = TimingPulleyCenterDistance( profile1, profile2, beltLength );
+        s1 = kvGet(profile1,"shaftDiameter" );
+        s2 = kvGet(profile2,"shaftDiameter" );
+
+        translate( [150,0,0] ) {
+            TimingPulleyConnected( profile1, profile2, beltLength, beltWidth=10, reversed=true );            
+                                             translate( [0,0,30] ) cylinder( 100, d=s1, center=true );
+            translate( [center2center,0,0] ) translate( [0,0,30] ) cylinder( 100, d=s2, center=true );
         }
+
+        // COMPUTATIONS
+        echo( TimingPulleyDiameter( "AT5", 64 ) );
+        echo( TimingPulleyDiameter( "AT5", 20 ) );
+        echo( TimingPulleyCenterDistanceByModel( "AT5", 64, 20, 700 ) );
     }
 
-    module PulleyCompareDiameter_Test() {
+    module TimingPulleyCompareDiameter_Test() {
         // compare 3D calculated face
         // vs chart data for difference
         // this will affect distance calculations
@@ -160,19 +114,19 @@ include <utility.scad>
     }
 
 //
-// HELPERS
+// DATABASE
 //
 
     // available models for 3D printing
-    pulleyModelsFor3DP = [
+    timingPulleyModelsFor3DP = [
         "MXL", "40DP", "XL", "L", 
         "T2.5", "T5", "T10", 
         "AT5",
         "HTD 3mm", "HTD 5mm", "HTD 8mm",
         "GT2 2mm", "GT2 3mm", "GT2 5mm" ];
     
-    // available models for mechanical display only
-    pulleyModelsForDisplay = [
+    // available models for visual representation only (no teeth if missing from 3D models)
+    timingPulleyModelsForDisplay = [
         "MXL", "40DP", "XL", "L", "H",
         "T2.5", "T5", "T10", 
         "AT5", "AT10",
@@ -183,67 +137,73 @@ include <utility.scad>
 // CONNECTED PULLEYS
 //
 
-    module PulleyConnected( motorPulleyProfile, drivenPulleyProfile, beltLength, beltWidth, reverseDrivenPulley=false, omitTeeth=false ) {
+    module TimingPulleyConnected( profile1, profile2, beltLength,
+    beltWidth, beltThickness=2, reversed=false, omitTeeth=false, showBelt=true ) {
         
-        // if not specified use smaller one on pulleys
+        // profile1 = motorized pulley set at origin
+        // profile2 = driven pulley
+        
+        // if not specified use smaller one on the pulleys
         eBeltWidth = (beltWidth==undef?
-            min(kvGet(motorPulleyProfile,"beltWidth"),kvGet(drivenPulleyProfile,"beltWidth"))
+            min(kvGet(profile1,"beltWidth"),kvGet(profile2,"beltWidth"))
             :beltWidth);
-        motorCenter = kvGet(motorPulleyProfile, "height.beltCenter");
-        drivenCenter = kvGet(drivenPulleyProfile, "height.beltCenter");
+        center1 = kvGet(profile1, "height.beltCenter");
+        center2 = kvGet(profile2, "height.beltCenter");
 
-        motorModel  = kvGet(motorPulleyProfile ,"toothModel"); motorToothCount  = kvGet(motorPulleyProfile, "toothCount");
-        drivenModel = kvGet(drivenPulleyProfile,"toothModel"); drivenToothCount = kvGet(drivenPulleyProfile,"toothCount");     
-        c2c = PulleyCenterDistanceByModel( motorModel, motorToothCount, drivenModel, drivenToothCount, beltLength );
+        model1 = kvGet(profile1,"toothModel"); toothCount1 = kvGet(profile1,"toothCount");
+        model2 = kvGet(profile2,"toothModel"); toothCount2 = kvGet(profile2,"toothCount");     
+        c2c = TimingPulleyCenterDistanceByModel( model1, toothCount1, toothCount2, beltLength, model2 );
         ExitIf( is_nan(c2c), "center to center distance error, belt too short?" );
         
-        r = reverseDrivenPulley?[180,0,0]:[0,0,0];
-
-        motorDiameter  = PulleyDiameter(motorModel, motorToothCount );
-        drivenDiameter = PulleyDiameter(drivenModel,drivenToothCount);
+        r = reversed?[180,0,0]:[0,0,0];
         
-        Pulley( motorPulleyProfile, omitTeeth=omitTeeth );
+        TimingPulley( profile1, omitTeeth=omitTeeth );
         
-        translate( [c2c,0,motorCenter])
+        translate( [c2c,0,center1])
         rotate( r )
-        translate( [0,0,-drivenCenter])
-        Pulley( drivenPulleyProfile, omitTeeth=omitTeeth );
-                
-        beltThickness=2;
-        translate([0,0,motorCenter-eBeltWidth/2])
-        linear_extrude( eBeltWidth )
-            difference() {
-                hull() {
-                    circle(d=motorDiameter+beltThickness*2);
-                    translate( [c2c,0,0])
-                        circle(d=drivenDiameter+beltThickness*2);
+        translate( [0,0,-center2])
+        TimingPulley( profile2, omitTeeth=omitTeeth );
+        
+        if ( showBelt ) {
+            motorDiameter  = TimingPulleyDiameter(model1,toothCount1);
+            drivenDiameter = TimingPulleyDiameter(model2,toothCount2);
+            translate([0,0,center1-eBeltWidth/2])
+            linear_extrude( eBeltWidth )
+                difference() {
+                    hull() {
+                        circle(d=motorDiameter+beltThickness*2);
+                        translate([c2c,0,0])
+                            circle(d=drivenDiameter+beltThickness*2);
+                    }
+                    hull() {
+                        circle(d=motorDiameter);
+                        translate([c2c,0,0])
+                            circle(d=drivenDiameter);
+                    }
                 }
-                hull() {
-                    circle(d=motorDiameter);
-                    translate( [c2c,0,0])
-                        circle(d=drivenDiameter);
-                }
-            }
+        }
     }
 
 //
 // DISTANCE BETWEEN PULLEYS
 //
 
-    function PulleyCenterDistance( motorPulleyProfile, drivenPulleyProfile, beltLength ) =
-        PulleyCenterDistanceByModel(
-            kvGet(motorPulleyProfile ,"toothModel"), kvGet(motorPulleyProfile, "toothCount"),
-            kvGet(drivenPulleyProfile,"toothModel"), kvGet(drivenPulleyProfile,"toothCount"),
-            beltLength );
+    function TimingPulleyCenterDistance( profile1, profile2, beltLength ) =
+        TimingPulleyCenterDistanceByModel(
+            toothModel =kvGet(profile1,"toothModel"), toothCount1=kvGet(profile1,"toothCount"),
+            toothModel2=kvGet(profile2,"toothModel"), toothCount2=kvGet(profile2,"toothCount"),
+            beltLength=beltLength );
 
-    function PulleyCenterDistanceByModel( toothModel1, toothCoun1, toothModel2, toothCoun2, beltLength ) =
+    function TimingPulleyCenterDistanceByModel( toothModel, toothCount1, toothCount2, beltLength, toothModel2 ) =
         let(
-            diameter1 = PulleyDiameter( toothModel1, toothCoun1 ),
-            diameter2 = PulleyDiameter( toothModel2, toothCoun2 )
+            eToothModel1 = (toothModel ==undef)?toothModel2:toothModel,
+            eToothModel2 = (toothModel2==undef)?toothModel:toothModel2,
+            diameter1 = TimingPulleyDiameter( eToothModel1, toothCount1 ),
+            diameter2 = TimingPulleyDiameter( eToothModel2, toothCount2 )
         )
-        CenterToCenterDistanceCore( diameter1, diameter2, beltLength );
+        CenterToCenterDistance( diameter1, diameter2, beltLength );
         
-    function CenterToCenterDistanceCore( diameter1, diameter2, beltLength ) =
+    function CenterToCenterDistance( diameter1, diameter2, beltLength ) =
         // https://www.sudenga.com/practical-applications/figuring-belt-lengths-and-distance-between-pulleys
         let(
             sum  = diameter1 + diameter2,
@@ -256,7 +216,7 @@ include <utility.scad>
 // PULLEY PROFILE
 //
 
-    function PulleyProfile(
+    function TimingPulleyProfile(
         //
         //   +-----------------------+   ---            ---
         //   |                       |   flatHeight
@@ -275,7 +235,7 @@ include <utility.scad>
         //           +-------+           ---            ---
         //                     -->|  |<- flange offset
         //
-        model,                 // user defined name
+        model = "",            // user defined name
         toothModel,            // "T5", "GT2 2mm"...
         toothCount,
         beltWidth,
@@ -288,8 +248,8 @@ include <utility.scad>
                                // nutCount         - usually 2 for guys :)
                                // angleBetweenNuts - angle of nuts around the base, eg. 3 nuts, 120 degrees for equal spacing
                                // nutInfo and captiveNutsInfo are for embedding nuts during 3D printing for securing to shaft
-        toothWidthTweak = 0.2, // adjustments on teeth for 3D printing
-        toothDepthTweak = 0    //    see notes in pulleyNotchedCylinderCore()
+        toothWidthTweak = 0.2, // adjustments on teeth to fine tune 3D printing
+        toothDepthTweak = 0    //    see notes in timingPulleyNotchedCylinderCore()
     ) = let(
         e1=ErrorIf( toothModel      ==undef, "tooth model missing"    ),
         e2=ErrorIf( toothCount      ==undef, "tooth count missing"    ),
@@ -306,48 +266,48 @@ include <utility.scad>
         eHubHeight          = SELECT( hubInfo[1]                             , 0 ),
         
         eTopFlange = topFlangeInfo==undef?undef:
-            KeyValue([ "offset", topFlangeInfo[0], "height", eTopFlangeHeight, "taperHeight", topFlangeInfo[1], "flatHeight", topFlangeInfo[2]    ]),
+            KVTree([ "offset", topFlangeInfo[0], "height", eTopFlangeHeight, "taperHeight", topFlangeInfo[1], "flatHeight", topFlangeInfo[2]    ]),
 
         eBottomFlangeInfo = bottomFlangeInfo==undef?undef:
-            KeyValue([ "offset", bottomFlangeInfo[0], "height", eBottomFlangeHeight, "taperHeight", bottomFlangeInfo[1], "flatHeight", bottomFlangeInfo[2] ]),
+            KVTree([ "offset", bottomFlangeInfo[0], "height", eBottomFlangeHeight, "taperHeight", bottomFlangeInfo[1], "flatHeight", bottomFlangeInfo[2] ]),
 
         eHub = hubInfo==undef?undef:
-            KeyValue([ "diameter", hubInfo[0], "height", hubInfo[1] ]),
+            KVTree([ "diameter", hubInfo[0], "height", hubInfo[1] ]),
 
         eNut = nutInfo==undef?undef:
-            KeyValue([ "shape", nutInfo[0], "boltDiameter", nutInfo[1], "nutDiameter", nutInfo[2], "thickness", nutInfo[3] ]),
+            KVTree([ "shape", nutInfo[0], "boltDiameter", nutInfo[1], "nutDiameter", nutInfo[2], "thickness", nutInfo[3] ]),
 
         eCaptiveNuts = captiveNutsInfo==undef?undef:
-            KeyValue([ "count", captiveNutsInfo[0], "angleBetweenNuts", captiveNutsInfo[1], "offsetFromShaft", captiveNutsInfo[2] ])
+            KVTree([ "count", captiveNutsInfo[0], "angleBetweenNuts", captiveNutsInfo[1], "offsetFromShaft", captiveNutsInfo[2] ])
 
-    ) KeyValue([
+    ) KVTree([
         "type"         , "timing pulley",
         "model"        , model,
         "toothModel"   , toothModel,
         "toothCount"   , toothCount,
         "beltWidth"    , beltWidth,
         "shaftDiameter", shaftDiameter,
-        "height"       , KeyValue([ "total"       , beltWidth+eTopFlangeHeight+eBottomFlangeHeight+eHubHeight,
-                                    "beltCenter"  , beltWidth/2               +eBottomFlangeHeight+eHubHeight,
-                                    "belt"        , beltWidth                                                ,
-                                    "topFlange"   ,           eTopFlangeHeight                               ,
-                                    "bottomFlange",                            eBottomFlangeHeight           ,
-                                    "hub"         ,                                                eHubHeight
-                                  ]),
+        "height"       , KVTree([ "total"       , beltWidth+eTopFlangeHeight+eBottomFlangeHeight+eHubHeight,
+                                  "beltCenter"  , beltWidth/2               +eBottomFlangeHeight+eHubHeight,
+                                  "belt"        , beltWidth                                                ,
+                                  "topFlange"   ,           eTopFlangeHeight                               ,
+                                  "bottomFlange",                            eBottomFlangeHeight           ,
+                                  "hub"         ,                                                eHubHeight
+                                ]),
         "topFlange"    , eTopFlange,
         "bottomFlange" , eBottomFlangeInfo,
         "hub"          , eHub,
         "nut"          , eNut,
         "captiveNuts"  , eCaptiveNuts,
         // tweaks for 3D printing are kept also, for different values for each pulley configuration
-        "tweak"        , KeyValue([ "toothWidth", toothWidthTweak, "toothDepth", toothDepthTweak ])
+        "tweak"        , KVTree([ "toothWidth", toothWidthTweak, "toothDepth", toothDepthTweak ])
     ]);
 
 //
 // COMPUTED PULLEY DIAMETER FROM CHARTS
 //
 
-    function PulleyDiameter( model, toothCount ) =
+    function TimingPulleyDiameter( model, toothCount ) =
         ( model == "MXL" ) ? (
             // https://www.pfeiferindustries.com/timing-belt-pulley-pitch-diameter-outside-diameter-charts
             // https://www.pfeiferindustries.com/documents/Engineering/Timing%20Belt%20Pulley%20PD%20and%20OD/(0.080%20MXL)%20Timing%20Belt%20Pulley%20PD%20and%20OD.pdf
@@ -396,20 +356,20 @@ include <utility.scad>
         );
 
 //
-// CYLINDER WITH TOOTH FOR 3D PRINTING
+// NOTCHED CYLINDER ONLY
 //
 
-    module PulleyNotchedCylinder( toothModel, toothCount, height, shaftDiameter, toothWidthTweak = 0, toothDepthTweak = 0 ) {
-        toothData = pulleyToothData( toothModel, toothCount );
+    module TimingPulleyNotchedCylinder( toothModel, toothCount, height, shaftDiameter, toothWidthTweak = 0, toothDepthTweak = 0 ) {
+        toothData = timingPulleyToothData( toothModel, toothCount );
         ExitIf( toothData==undef, "tooth model not found" );
         difference() {
-            pulleyNotchedCylinderCore( toothData, toothCount, height, toothWidthTweak, toothDepthTweak );
+            timingPulleyNotchedCylinderCore( toothData, toothCount, height, toothWidthTweak, toothDepthTweak );
             translate([0,0,-1])
                 cylinder( height+2, d=shaftDiameter );
         }
     }
     
-    module pulleyNotchedCylinderCore( toothData, toothCount, beltWidth, for3DPrinting=false, toothWidthTweak=0.2, toothDepthTweak=0 ) {
+    module timingPulleyNotchedCylinderCore( toothData, toothCount, beltWidth, for3DPrinting=false, toothWidthTweak=0.2, toothDepthTweak=0 ) {
 
         // ==============================
         //   Scaling Tooth for Good Fit
@@ -460,7 +420,7 @@ include <utility.scad>
         }
     }
 
-    function pulleyToothData( model, toothCount ) = let (
+    function timingPulleyToothData( model, toothCount ) = let (
         // to add new pulleys, this is the guy to talk to: droftarts
         // https://www.thingiverse.com/thing:16627
         calc_pulley_dia_tooth_spacing = function( toothCount, tooth_pitch, pitch_line_offset ) 
@@ -546,7 +506,7 @@ include <utility.scad>
 // COMPLETE PULLEY
 //
 
-    module Pulley( profile, omitTeeth=false, for3DPrinting=false, autoFlip=false ) {
+    module TimingPulley( profile, omitTeeth=false, for3DPrinting=false, autoFlip=false ) {
         
         // omitTeeth     - omit teeth for better performance in mechanical designs
         // for3DPrinting - high quality output
@@ -558,7 +518,7 @@ include <utility.scad>
         module go() {
             toothModel = kvGet(profile, "toothModel" );
             toothCount = kvGet(profile, "toothCount" );
-            toothData = pulleyToothData( toothModel, toothCount );            
+            toothData = timingPulleyToothData( toothModel, toothCount );            
             if ( for3DPrinting ) {
                 // must have tooth data                
                 ExitIf( toothData==undef, str( "unsupported toothModel [", toothModel, "]") );
@@ -614,7 +574,6 @@ include <utility.scad>
                     ExitIf( hubHeight<2, "*** HUB HEIGHT LESS THAN 2 ***" );
                     ExitIf( hubHeight<nutDiameter, "*** PROBLEM WITH CAPTIVE NUTS, HUB HEIGHT LESS THAN NUT DIAMETER ***" );
                     ExitIf( (hubDiameter-shaftDiameter)/2 < nutThickness+3, "*** PROBLEM WITH CAPTIVE NUTS, HUB DIAMETER TOO SMALL FOR NUT DEPTH ***" );
-
                 }
                 
                 // flip if upper portion > base diameter
@@ -632,28 +591,28 @@ include <utility.scad>
                                 // TOP FLANGE
                                 if ( topFlangeHeight > 0 ) {
                                     translate( [0,0,beltWidth] )
-                                    pulleyTopFlange( notchedCylinderDiameter, topFlangeInfo, for3DPrinting, toothCount );
+                                    TopFlange( notchedCylinderDiameter, topFlangeInfo, for3DPrinting, toothCount );
                                 }
                                 // NOTCHED CYLINDER
                                 if ( eOmitTeeth )
                                     cylinder( beltWidth, d=notchedCylinderDiameter );
                                 else
-                                    pulleyNotchedCylinderCore( toothData, toothCount, beltWidth, 
+                                    timingPulleyNotchedCylinderCore( toothData, toothCount, beltWidth, 
                                         for3DPrinting, toothWidthTweak, toothDepthTweak );
                             }
                             // BOTTOM FLANGE
                             if ( bottomFlangeHeight > 0 )
-                                pulleyBottomFlange( notchedCylinderDiameter, bottomFlangeInfo, for3DPrinting, toothCount );
+                                BottomFlange( notchedCylinderDiameter, bottomFlangeInfo, for3DPrinting, toothCount );
                         }
                         // HUB
                         if ( hubHeight>0 ) {
                             difference() {
                                 // create base ...
-                                pulleyHub( hubDiameter, hubHeight, hubTopDiameter, for3DPrinting );
+                                Hub( hubDiameter, hubHeight, hubTopDiameter, for3DPrinting );
                                 // ... subtract bolt/grub
                                 if ( nutInfo!=undef && captiveNutsInfo!=undef ) {
                                     translate( [ 0,0,hubHeight/2 ] )
-                                    pulleyHubCaptiveNuts( nutInfo, captiveNutsInfo, shaftDiameter,
+                                    HubCaptiveNuts( nutInfo, captiveNutsInfo, shaftDiameter,
                                         hubHeight/2,  // center bolts on hub
                                         hubDiameter/2
                                     );
@@ -670,127 +629,129 @@ include <utility.scad>
                 }
             }
         }
-    }
+    
+        //
+        // FLANGES
+        //
 
-//
-// FLANGES
-//
-
-    module pulleyTopFlange( pulleyDiameter, flangeInfoKV, for3DPrinting=false, toothCount ) {
-        // flangeInfoKV = KeyValue([ "offset", _, "taperHeight", _, "flatHeight", _ ]),
-        offset      = kvGet(flangeInfoKV, "offset"      );
-        taperHeight = kvGet(flangeInfoKV, "taperHeight" );
-        flatHeight  = kvGet(flangeInfoKV, "flatHeight"  );
-        // +--------+
-        //          |
-        //          +
-        //         /
-        //        /
-        // 0-----+
-        quality = for3DPrinting?toothCount*4:$fn;
-        rotate_extrude( $fn=quality ) polygon([
-            [ 0                         , 0                        ],
-            [ pulleyDiameter/2          , 0                        ],
-            [ pulleyDiameter/2 + offset , taperHeight              ],
-            [ pulleyDiameter/2 + offset , taperHeight + flatHeight ],
-            [ 0                         , taperHeight + flatHeight ]
-        ]);
-    }
-
-    module pulleyBottomFlange( pulleyDiameter, flangeInfoKV, for3DPrinting=false, toothCount ) {
-        // flangeInfoKV = KeyValue([ "offset", _ "taperHeight", _ "flatHeight", _ ]),
-        offset      = kvGet(flangeInfoKV, "offset"      );
-        taperHeight = kvGet(flangeInfoKV, "taperHeight" );
-        flatHeight  = kvGet(flangeInfoKV, "flatHeight"  );
-        // +-----+
-        //        \
-        //         \
-        //          +
-        //          |
-        // 0--------+
-        quality = for3DPrinting?toothCount*4:$fn;
-        rotate_extrude( $fn=quality ) polygon([
-            [ 0                         , 0                        ],
-            [ pulleyDiameter/2 + offset , 0                        ],
-            [ pulleyDiameter/2 + offset ,               flatHeight ],
-            [ pulleyDiameter/2          , taperHeight + flatHeight ],
-            [ 0                         , taperHeight + flatHeight ],
-        ]);
-    }
-
-//
-// HUB
-//
-
-    module pulleyHub( diameter, height, upperSectionDiameter, for3DPrinting=false ) {
-        quality = for3DPrinting?diameter*2:$fn;
-        if ( upperSectionDiameter >= diameter ) {
-            // NO BEVEL - hub smaller than upper section
-            //   +----------+
-            //   ||||||||||||
-            //   +---+--+---+
-            //       |  |
-            //       +--+
-            translate( [0,0,height/2] )
-                cylinder( h=height, r=diameter/2, center=true, $fn=quality );
-        } else {
-            // WITH BEVEL - hub bigger than upper section
-            //       +--+
-            //       ||||
-            //   /---+--+---\
-            //   |          |
-            //   +----------+
-            bevel = ( diameter - upperSectionDiameter < 1 )
-                ? ( diameter - upperSectionDiameter ) // bevel the difference
-                : 1;                                  // but limit to 1
-            rotate_extrude( $fn=quality ) {
-                square(    [ diameter/2-bevel , height       ] );
-                square(    [ diameter/2       , height-bevel ] );
-                translate( [ diameter/2-bevel , height-bevel ] )
-                    circle( bevel );
-            }
+        module TopFlange( pulleyDiameter, flangeInfoKV, for3DPrinting=false, toothCount ) {
+            // flangeInfoKV = KeyValue([ "offset", _, "taperHeight", _, "flatHeight", _ ]),
+            offset      = kvGet(flangeInfoKV, "offset"      );
+            taperHeight = kvGet(flangeInfoKV, "taperHeight" );
+            flatHeight  = kvGet(flangeInfoKV, "flatHeight"  );
+            // +--------+
+            //          |
+            //          +
+            //         /
+            //        /
+            // 0-----+
+            quality = for3DPrinting?toothCount*4:$fn;
+            rotate_extrude( $fn=quality ) polygon([
+                [ 0                         , 0                        ],
+                [ pulleyDiameter/2          , 0                        ],
+                [ pulleyDiameter/2 + offset , taperHeight              ],
+                [ pulleyDiameter/2 + offset , taperHeight + flatHeight ],
+                [ 0                         , taperHeight + flatHeight ]
+            ]);
         }
-    }
 
-    module pulleyHubCaptiveNuts( nutKV, captiveNutsKV, shaftDiameter, nutInsertionDepth, boltLength ) {
-
-        // nutKV = KeyValue([ "shape", _, "boltDiameter", _, "nutDiameter", _, "thickness", _ ]),
-        useHex       = kvGet(nutKV, "shape" )!="square"; // unless square, default to hex
-        boltDiameter = kvGet(nutKV, "boltDiameter" );
-        nutFaceSize  = kvGet(nutKV, "nutDiameter"  );
-        nutThickness = kvGet(nutKV, "thickness"    );
-
-        // captiveNutsKV = KeyValue([ "count", _, "angleBetweenNuts", _, "offsetFromShaft", _ ])
-        numberOfNuts     = kvGet(captiveNutsKV, "count"            );
-        angleBetweenNuts = kvGet(captiveNutsKV, "angleBetweenNuts" );
-        offsetFromShaft  = kvGet(captiveNutsKV, "offsetFromShaft"  );
-        offsetFromOrigin = offsetFromShaft + shaftDiameter/2;
+        module BottomFlange( pulleyDiameter, flangeInfoKV, for3DPrinting=false, toothCount ) {
+            // flangeInfoKV = KeyValue([ "offset", _ "taperHeight", _ "flatHeight", _ ]),
+            offset      = kvGet(flangeInfoKV, "offset"      );
+            taperHeight = kvGet(flangeInfoKV, "taperHeight" );
+            flatHeight  = kvGet(flangeInfoKV, "flatHeight"  );
+            // +-----+
+            //        \
+            //         \
+            //          +
+            //          |
+            // 0--------+
+            quality = for3DPrinting?toothCount*4:$fn;
+            rotate_extrude( $fn=quality ) polygon([
+                [ 0                         , 0                        ],
+                [ pulleyDiameter/2 + offset , 0                        ],
+                [ pulleyDiameter/2 + offset ,               flatHeight ],
+                [ pulleyDiameter/2          , taperHeight + flatHeight ],
+                [ 0                         , taperHeight + flatHeight ],
+            ]);
+        }
         
-        NUT_POINTS = 2*((nutFaceSize/2)/cos(30));
-        
-        for( j = [ 1 : numberOfNuts ] ) {
-            rotate( [ 0, 0, j*angleBetweenNuts ] )
-            rotate( [90,0,0] )
-            union() {
-                
-                // nut entrance
-                translate( [ 0, -nutInsertionDepth/2-0.5, nutThickness/2+offsetFromOrigin ] )
-                    cube( [ nutFaceSize, nutInsertionDepth+1, nutThickness ], center=true );
+        //
+        // HUB
+        //
 
-                // nut
-                if ( useHex ) {
-                    // hex nut
-                    translate( [ 0, 0.25, nutThickness/2+offsetFromOrigin ] ) 
-                    rotate( [0,0,30] ) 
-                    cylinder( r=NUT_POINTS/2, h=nutThickness, center=true, $fn=6 );
-                } else {
-                    // square nut
-                    translate( [ 0, 0.25, nutThickness/2+offsetFromOrigin ] ) 
-                    cube( [ nutFaceSize, nutFaceSize, M3_NUT_DEPTH ], center=true );
+        module Hub( diameter, height, upperSectionDiameter, for3DPrinting=false ) {
+            quality = for3DPrinting?diameter*2:$fn;
+            if ( upperSectionDiameter >= diameter ) {
+                // NO BEVEL - hub smaller than upper section
+                //   +----------+
+                //   ||||||||||||
+                //   +---+--+---+
+                //       |  |
+                //       +--+
+                translate( [0,0,height/2] )
+                    cylinder( h=height, r=diameter/2, center=true, $fn=quality );
+            } else {
+                // WITH BEVEL - hub bigger than upper section
+                //       +--+
+                //       ||||
+                //   /---+--+---\
+                //   |          |
+                //   +----------+
+                bevel = ( diameter - upperSectionDiameter < 1 )
+                    ? ( diameter - upperSectionDiameter ) // bevel the difference
+                    : 1;                                  // but limit to 1
+                rotate_extrude( $fn=quality ) {
+                    square(    [ diameter/2-bevel , height       ] );
+                    square(    [ diameter/2       , height-bevel ] );
+                    translate( [ diameter/2-bevel , height-bevel ] )
+                        circle( bevel );
                 }
-
-                // grub bolt hole
-                rotate( [0,0,22.5] ) cylinder( d=boltDiameter, h=boltLength+1, $fn=8 );
             }
         }
+
+        module HubCaptiveNuts( nutKV, captiveNutsKV, shaftDiameter, nutInsertionDepth, boltLength ) {
+
+            // nutKV = KeyValue([ "shape", _, "boltDiameter", _, "nutDiameter", _, "thickness", _ ]),
+            useHex       = kvGet(nutKV, "shape" )!="square"; // unless square, default to hex
+            boltDiameter = kvGet(nutKV, "boltDiameter" );
+            nutFaceSize  = kvGet(nutKV, "nutDiameter"  );
+            nutThickness = kvGet(nutKV, "thickness"    );
+
+            // captiveNutsKV = KeyValue([ "count", _, "angleBetweenNuts", _, "offsetFromShaft", _ ])
+            numberOfNuts     = kvGet(captiveNutsKV, "count"            );
+            angleBetweenNuts = kvGet(captiveNutsKV, "angleBetweenNuts" );
+            offsetFromShaft  = kvGet(captiveNutsKV, "offsetFromShaft"  );
+            offsetFromOrigin = offsetFromShaft + shaftDiameter/2;
+            
+            NUT_POINTS = 2*((nutFaceSize/2)/cos(30));
+            
+            for( j = [ 1 : numberOfNuts ] ) {
+                rotate( [ 0, 0, j*angleBetweenNuts ] )
+                rotate( [90,0,0] )
+                union() {
+                    
+                    // nut entrance
+                    translate( [ 0, -nutInsertionDepth/2-0.5, nutThickness/2+offsetFromOrigin ] )
+                        cube( [ nutFaceSize, nutInsertionDepth+1, nutThickness ], center=true );
+
+                    // nut
+                    if ( useHex ) {
+                        // hex nut
+                        translate( [ 0, 0.25, nutThickness/2+offsetFromOrigin ] ) 
+                        rotate( [0,0,30] ) 
+                        cylinder( r=NUT_POINTS/2, h=nutThickness, center=true, $fn=6 );
+                    } else {
+                        // square nut
+                        translate( [ 0, 0.25, nutThickness/2+offsetFromOrigin ] ) 
+                        cube( [ nutFaceSize, nutFaceSize, M3_NUT_DEPTH ], center=true );
+                    }
+
+                    // grub bolt hole
+                    rotate( [0,0,22.5] ) cylinder( d=boltDiameter, h=boltLength+1, $fn=8 );
+                }
+            }
+        }
+
     }
+    

@@ -13,7 +13,7 @@
 //
 // note: use omitBalls parameter to disable balls for faster redraw
 
-include <key-value.scad>
+include <KVTree.scad>
 include <utility.scad>
 
 //
@@ -21,24 +21,23 @@ include <utility.scad>
 //
 
     // run me!!!
-    //ThrustBearing_Demo();
+    ThrustBearing_Demo();
 
     module ThrustBearing_Demo() {
-        $fn=20;
+        //$fn=50;
         
         profile1 = ThrustBearingProfile(
-            model="abc", ID=20, OD=30, thickness=10 );
+            model="dunkin", ID=20, OD=30, thickness=10 );
         ThrustBearing( profile1 );
         
-        profile2 = ThrustBearingFromLibrary( "51102" );        
+        profile2 = ThrustBearingFromLibrary( "51102" );
         translate( [50,0,-kvGet(profile2,"thickness")] )
-            ThrustBearing( profile2 );        
-        kvEcho( profile2 );
+            ThrustBearing( profile2 );
+        //kvEcho( profile2 );
 
-        profile3 = ThrustBearingFromLibrary( "F12-21M" );        
+        profile3 = ThrustBearingFromLibrary( "F12-21M" );
         translate( [100,0,0] )
-            ThrustBearing( profile3, omitBalls=true );        
-
+            ThrustBearing( profile3, omitBalls=true );
     }
 
 //
@@ -46,15 +45,15 @@ include <utility.scad>
 //
 
     function ThrustBearingProfile(
-        model     = "",
-        ID        = 10,
-        OD        = 20,
-        thickness = 5
+        model = "",
+        ID,
+        OD,
+        thickness
     ) = let(
         e1=ErrorIf( ID       ==undef, "inner diameter missing" ),
         e2=ErrorIf( OD       ==undef, "outer diameter missing" ),
         e3=ErrorIf( thickness==undef, "thickness missing"      )
-    ) KeyValue([
+    ) KVTree([
         "type"     , "thrust bearing",
         "model"    , model,
         "ID"       , ID,
@@ -70,8 +69,7 @@ include <utility.scad>
             //r = ThrustBearingFindModel( model )
             r = find( model ),
             e1=ErrorIf( r==undef, "model not found" )
-        ) 
-        KeyValue([
+        ) KVTree([
             "type"     , "thrust bearing",
             "model"    , r[0],
             "ID"       , r[1],

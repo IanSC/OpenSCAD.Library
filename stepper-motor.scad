@@ -9,7 +9,7 @@
 //     StepperMotor( profile )              - draw 3D
 //     StepperMotorPanelHole( profile )     - draw 2D panel holes
 
-include <key-value.scad>
+include <KVTree.scad>
 include <utility.scad>
 
 //
@@ -17,40 +17,49 @@ include <utility.scad>
 //
 
     // run me!!!
-    //StepperMotor_Demo();
+    StepperMotor_Demo();
 
     module StepperMotor_Demo() {
         
         profile1 = StepperMotorProfile( nemaModel="NEMA17" );
-        generateMotorAndPanel( profile1 );
+        PartAndPanel() {
+            StepperMotor( profile1 );
+            StepperMotorPanelHoles( profile1 );
+        };
         
         // custom size
         // https://www.sparkfun.com/products/13656 ==> Wantai 57BYGH420-2
         // https://www.openimpulse.com/blog/wp-content/uploads/wpsc/downloadables/57BYGH420-Stepper-Motor-Datasheet.pdf
         profile2 = StepperMotorProfile(
-            model              = "Wantai 57BYGH420-2",
-            bodyDiameter       = 56.4,
-            bodyLength         = 56,
-            shaftDiameter      = 6.35,
-            shaftLength        = 21-1.6,
-            boltDiameter       = 5,
-            boltLength         = 10,
-            boltToBoltDistance = 47.14,
-            frontCylinder      = [38.1,1.6], // diameter,height
-            flangeThickness    = [4.8,0],    // top, bottom
-            bodyTaper          = 1 );
+            model           = "Wantai 57BYGH420-2",
+            bodyDiameter    = 56.4,
+            bodyLength      = 56,
+            shaftDiameter   = 6.35,
+            shaftLength     = 21-1.6,
+            boltDiameter    = 5,
+            boltLength      = 10,
+            boltDistance    = 47.14,
+            frontCylinder   = [ 38.1, 1.6 ], // diameter, height
+            flangeThickness = [  4.8,   0 ], // upper, lower
+            bodyTaper       = 1 );
         translate( [100,0,0] )
-            generateMotorAndPanel( profile2 );
+        PartAndPanel() {
+            StepperMotor( profile2 );
+            StepperMotorPanelHoles( profile2, enlargeBolt=3 );
+        };
         kvEcho( profile2 );
-        
+
         // with gear, bolts on gear
         profile3 = StepperMotorProfile(
-            nemaModel          = "NEMA23",
-            boltToBoltDistance = 20,
-            frontCylinder      = [40,20]
+            nemaModel     = "NEMA23",
+            boltDistance  = 20,
+            frontCylinder = [40,20]
         );
         translate( [200,0,0] )
-            generateMotorAndPanel( profile3 );
+        PartAndPanel() {
+            StepperMotor( profile3 );
+            StepperMotorPanelHoles( profile3 );
+        };
             
         // with gear, bolts on body, back cylinder and shaft
         // bigger panel hole
@@ -58,17 +67,17 @@ include <utility.scad>
             nemaModel          = "NEMA23",
             boltDiameter       = 8,
             boltLength         = 25+8,    // go below frontCylinderLength
-            boltToBoltDistance = 38,
+            boltDistance       = 38,
             frontCylinder      = [40,25],
             backCylinder       = [40,20],
             panelHoleDiameter  = 40+2,    // larger than frontCylinderDiameter
             backShaftLength    = 20 );
-        // position to upper flange
         translate( [300,0,0] ) {
+            // position to upper flange
             translate( [0,0, kvGet(profile4,"length.frontCylinder")] )
                 StepperMotor( profile4 );
-            translate( [0,-100,0] )
-                generatePanel( profile4 );
+            translate( [0,-100,0] ) PanelOnly()
+                StepperMotorPanelHoles( profile4 );
         }
         
         // position to lower shaft
@@ -83,18 +92,19 @@ include <utility.scad>
                 StepperMotor( profile4 );
         }
         
-        module generateMotorAndPanel( profile ) {
-            StepperMotor( profile );
+        module PartAndPanel() {
+            children(0);
             translate( [0,-100,0] )
-                generatePanel( profile );            
+                PanelOnly() children(1);
         }
-        module generatePanel( profile ) {
+        module PanelOnly() {
             linear_extrude( 3 )
             difference() {
                 square( [60,60], center=true );
-                StepperMotorPanelHole( profile );
+                children();
             }
         }
+
     }
 
 //
@@ -112,7 +122,7 @@ include <utility.scad>
         defShaftDiameter,
         defShaftLength,
         defBoltDiameter
-    ) = KeyValue([
+    ) = KVTree([
         "model"        , model,
         "boltDistance" , boltDistance,
         "bodyDiameter" , defBodyDiameter, 
@@ -132,7 +142,7 @@ include <utility.scad>
     // https://www.sanyodenki.com/archive/document/product/servo/catalog_E_pdf/SANMOTION_F2_E.pdf#page=1
     // NEMA8=?, NEMA11=28mm, NAME14=35mm, NEMA16=40, NEMA17=42, NEMA23=56mm?, NEMA24=60mm, NEMA34=86mm, NEMA42=106mm
 
-    NemaFrameSizes = KeyValue( [
+    NemaFrameSizes = KVTree( [
         "NEMA8",  NemaFrameProfile( model="NEMA8" , boltDistance=16   , defBodyDiameter=0.8*25.4, defBodyLength=0.8*25.4, defShaftDiameter= 4   , defShaftLength=10, defBoltDiameter=2.5 ),        
         "NEMA11", NemaFrameProfile( model="NEMA11", boltDistance=23   , defBodyDiameter=1.1*25.4, defBodyLength=1.1*25.4, defShaftDiameter= 5   , defShaftLength=10, defBoltDiameter=2.5 ),
         "NEMA14", NemaFrameProfile( model="NEMA14", boltDistance=26   , defBodyDiameter=1.4*25.4, defBodyLength=1.4*25.4, defShaftDiameter= 5   , defShaftLength=20, defBoltDiameter=3   ),
@@ -151,23 +161,19 @@ include <utility.scad>
     function StepperMotorProfile(
         model = "",
         nemaModel = undef,
-
-        bodyDiameter, bodyLength,
-        shaftDiameter, shaftLength,
-
+        bodyDiameter,
+        bodyLength,          // body only (includes flanges), excluding cylinders and shafts
+        shaftDiameter,
+        shaftLength,
         boltProfile,
-        boltDiameter, boltLength,
-        boltToBoltDistance,
-
-        frontCylinder, // [ diameter, height ]
-        backCylinder,  // [ diameter, height ]
-
-        //frontCylinderDiameter = 0, frontCylinderLength = 0,
-        //backCylinderDiameter  = 0, backCylinderLength  = 0,
-        flangeThickness, // [ upper flange, lower flange ]
-        //frontFlangeLength = undef, backFlangeLength = undef, 
-        bodyTaper,     // taper between flanges
-        overallTaper,  // taper on flanges and body
+        boltDiameter,
+        boltLength,
+        boltDistance,        // bolt to bolt distance
+        frontCylinder,       // [ diameter, height ]
+        backCylinder,        // [ diameter, height ]
+        flangeThickness,     // [ upper flange, lower flange ]
+        bodyTaper,           // taper between flanges
+        overallTaper,        // taper on flanges and body
         backShaftLength = 0,
         panelHoleDiameter
     ) = let(
@@ -178,20 +184,19 @@ include <utility.scad>
         nemaData = ( nemaModel==undef || nemaModel=="" ? undef : kvSearch( NemaFrameSizes, nemaModel ) ),
         
         eNemaModel     = sel( nemaModel,          ""                                  ),
-        eBodyDiameter  = sel( bodyDiameter,       kvSearchLax(nemaData,"bodyDiameter" ) ),
-        eBodyLength    = sel( bodyLength,         kvSearchLax(nemaData,"bodyLength"   ) ),
-        eShaftDiameter = sel( shaftDiameter,      kvSearchLax(nemaData,"shaftDiameter") ),
-        eShaftLength   = sel( shaftLength,        kvSearchLax(nemaData,"shaftLength"  ) ),
-        eB2BDistance   = sel( boltToBoltDistance, kvSearchLax(nemaData,"boltDistance" ), eBodyDiameter*0.8 ),
+        eBodyDiameter  = sel( bodyDiameter,  kvSearchLax(nemaData,"bodyDiameter" ) ),
+        eBodyLength    = sel( bodyLength,    kvSearchLax(nemaData,"bodyLength"   ) ),
+        eShaftDiameter = sel( shaftDiameter, kvSearchLax(nemaData,"shaftDiameter") ),
+        eShaftLength   = sel( shaftLength,   kvSearchLax(nemaData,"shaftLength"  ) ),
+        eB2BDistance   = sel( boltDistance,  kvSearchLax(nemaData,"boltDistance" ), eBodyDiameter*0.8 ),
 
-        //eBoltDiameter  = sel( boltDiameter,       kvSearchLax(nemaData,"boltDiameter" ), 0 ),
         eBoltDiameter  = sel( boltDiameter, kvSearchLax(boltProfile,"diameter" ), kvSearchLax(nemaData,"boltDiameter" ) ),
         eBoltLength    = sel( boltLength  , kvSearchLax(boltProfile,"length"   ), 5 ),
 
         frontCylinderDiameter = sel( frontCylinder[0], 0 ), frontCylinderLength = sel( frontCylinder[1], 0 ),
         backCylinderDiameter  = sel( backCylinder [0], 0 ), backCylinderLength  = sel( backCylinder [1], 0 ),
 
-        // if not specified assume shaftDiameter + 2mm
+        // if not specified assume larger than shaftDiameter + 2mm
         ePanelHoleDiameter = sel( panelHoleDiameter,  eShaftDiameter+2 ),
 
         eOverallTaper = sel( overallTaper, eBodyDiameter*0.05 /* 5% of body */ ),
@@ -200,30 +205,22 @@ include <utility.scad>
         eFrontFlangeLength = (flangeThickness==undef)?eBodyLength*0.25:flangeThickness[0],
         eBackFlangeLength  = (flangeThickness==undef)?eBodyLength*0.25:flangeThickness[1],
 
-        //eFrontFlangeLength = sel( frontFlangeLength, IIF(backFlangeLength ==undef,eBodyLength*0.25,0) ),
-        //eBackFlangeLength  = sel( backFlangeLength,  IIF(frontFlangeLength==undef,eBodyLength*0.25,0) ),
-
         // assume body taper if has flanges 
         eBodyTaper = sel( bodyTaper, 
             IIF( eFrontFlangeLength==0 && eBackFlangeLength==0,
                 0,
                 min( eBodyDiameter*0.2, eBodyDiameter - eB2BDistance )
             ) ),
-//        eBodyTaper = sel( bodyTaper, 
-//            IIF( eFrontFlangeLength==0 && eBackFlangeLength==0,
-//                0,
-//                min( eBodyDiameter*0.2, eBodyDiameter - eB2BDistance )
-//            ) ),
-            
+
         e1=ErrorIf( nemaModel!=undef && nemaData==undef, "NEMA model not found" ),
         e2=ErrorIf( eBodyLength-eFrontFlangeLength-eBackFlangeLength<=0, "flanges too thick" )
         
-    ) KeyValue([
+    ) KVTree([
         "type"             , "stepper motor",
         "model"            , model,
         "nema"             , eNemaModel,
         "bodyDiameter"     , eBodyDiameter,
-        "length"           , KeyValue([
+        "length"           , KVTree([
             "all"          , eShaftLength+frontCylinderLength+eBodyLength+backCylinderLength+backShaftLength,
             "body"         ,              frontCylinderLength+eBodyLength+backCylinderLength                ,
             "bodyOnly"     ,                                  eBodyLength                                   ,
@@ -233,13 +230,13 @@ include <utility.scad>
             "backShaft"    ,                                                                 backShaftLength,
             "frontFlange"  , eFrontFlangeLength,
             "backFlange"   , eBackFlangeLength ]),
-        "shaft"            , KeyValue([ "diameter", eShaftDiameter, "length", eShaftLength ]),
-        "backShaft"        , KeyValue([ "diameter", eShaftDiameter, "length", backShaftLength ]),
-        "bolt"             , KeyValue([ "diameter", eBoltDiameter,  "length", eBoltLength, "distance", eB2BDistance ]),
+        "shaft"            , KVTree([ "diameter", eShaftDiameter, "length", eShaftLength ]),
+        "backShaft"        , KVTree([ "diameter", eShaftDiameter, "length", backShaftLength ]),
+        "bolt"             , KVTree([ "diameter", eBoltDiameter,  "length", eBoltLength, "distance", eB2BDistance ]),
         "panelHole"        , ePanelHoleDiameter,
-        "frontCylinder"    , KeyValue([ "diameter", frontCylinderDiameter, "length", frontCylinderLength ]),
-        "backCylinder"     , KeyValue([ "diameter", backCylinderDiameter,  "length", backCylinderLength  ]),
-        "taper"            , KeyValue([ "overall",  eOverallTaper, "body", eBodyTaper ])
+        "frontCylinder"    , KVTree([ "diameter", frontCylinderDiameter, "length", frontCylinderLength ]),
+        "backCylinder"     , KVTree([ "diameter", backCylinderDiameter,  "length", backCylinderLength  ]),
+        "taper"            , KVTree([ "overall",  eOverallTaper, "body", eBodyTaper ])
     ]);
 
     module StepperMotor( profile ) {
@@ -287,10 +284,6 @@ include <utility.scad>
             betweenFlangeHeight = bodyOnlyLength - frontFlangeLength - backFlangeLength;
 
             // make body smaller if has upper/lower flange for aesthetics
-            // ebodyWidth = ( frontFlangeLength!=0||lowerFlangeHeight!=0 ? 
-            //     min( bodyWidth*0.90, bodyWidth-taperOverall*20 )
-            //     : bodyWidth );
-
             ebodyWidth = bodyWidth * 
                 ( frontFlangeLength != 0 || lowerFlangeHeight != 0 ? 0.95 : 1 );
 
@@ -366,7 +359,7 @@ include <utility.scad>
         }
     }
 
-    module StepperMotorPanelHole( profile, enlarge=1 ) {
+    module StepperMotorPanelHoles( profile, enlargeBolt=1 ) {
         t = kvSearch(profile,"type");
         ExitIf( t!="stepper motor", "StepperMotorPanelHole(): invalid profile" );
         go();
@@ -376,10 +369,10 @@ include <utility.scad>
             panelHoleDiameter  = kvGet(profile, "panelHole"     );
 
             b2b2 = boltToBoltDistance/2;
-            translate( [ b2b2, b2b2,0] ) circle( d=boltDiameter+enlarge );
-            translate( [ b2b2,-b2b2,0] ) circle( d=boltDiameter+enlarge );
-            translate( [-b2b2, b2b2,0] ) circle( d=boltDiameter+enlarge );
-            translate( [-b2b2,-b2b2,0] ) circle( d=boltDiameter+enlarge );
+            translate( [ b2b2, b2b2,0] ) circle( d=boltDiameter+enlargeBolt );
+            translate( [ b2b2,-b2b2,0] ) circle( d=boltDiameter+enlargeBolt );
+            translate( [-b2b2, b2b2,0] ) circle( d=boltDiameter+enlargeBolt );
+            translate( [-b2b2,-b2b2,0] ) circle( d=boltDiameter+enlargeBolt );
             circle( d=panelHoleDiameter );
         }
     }

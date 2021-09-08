@@ -1,8 +1,8 @@
 //
-// KEY-VALUE TABLE
+// KVTree
 // by ISC 2021
 //
-// searchable key-value table
+// searchable key-value tree structure
 // for compact storage of data values
 
 include <utility.scad>
@@ -12,22 +12,22 @@ include <utility.scad>
 //
 
     // run me!!!
-    //KeyValue_Demo();
+    //KVTree_Demo();
 
-    module KeyValue_Demo() {
+    module KVTree_Demo() {
 
-        table = KeyValue([
+        table = KVTree([
             "solo"   , 0,
             "notSure", undef,
-            "fruit"  , KeyValue([ "apple", 1,      "banana", 2,       "carrot", 3     ]),
-            "color"  , KeyValue([ "red"  , "meat", "green" , "grass", "blue"  , "sky" ]),
-            "animal" , KeyValue([
-                "dog"  , KeyValue([
-                    "breed", KeyValue([ "poodle",  10, "chihuahua", 20 ]),
-                    "color", KeyValue([ "white",   30, "brown",     40 ]) ]),
-                "cat"  , KeyValue([
-                    "breed", KeyValue([ "siamese", 50, "persian",   60 ]),
-                    "color", KeyValue([ "cream",   70, "lilac",     80 ]) ]) ]),
+            "fruit"  , KVTree([ "apple", 1,      "banana", 2,       "carrot", 3     ]),
+            "color"  , KVTree([ "red"  , "meat", "green" , "grass", "blue"  , "sky" ]),
+            "animal" , KVTree([
+                "dog"  , KVTree([
+                    "breed", KVTree([ "poodle",  10, "chihuahua", 20 ]),
+                    "color", KVTree([ "white",   30, "brown",     40 ]) ]),
+                "cat"  , KVTree([
+                    "breed", KVTree([ "siamese", 50, "persian",   60 ]),
+                    "color", KVTree([ "cream",   70, "lilac",     80 ]) ]) ]),
             "model", "ABC123"
         ]);
         
@@ -85,7 +85,7 @@ include <utility.scad>
         echo( kvSearchOCD( table, "notSure"   , defaultValue="dunno", ifKeyMissing="missing" ) ); // "dunno"
 
         echo( "\n\n FUNCTION" );
-        mathPack = KeyValue([
+        mathPack = KVTree([
             "+", function(x,y) x+y,
             "-", function(x,y) x-y,
             "x", function(x,y) x*y,
@@ -99,7 +99,7 @@ include <utility.scad>
 // CREATE
 //
 
-    function KeyValue( list ) =
+    function KVTree( list ) =
         // input  = [ "a", 1, "b", 2, "c", 3 ]
         // output = [ ["a",1] , ["b",2] , ["c",3] ]
         [ for(i=[0:2:len(list)-1]) [ list[i], list[i+1] ] ];

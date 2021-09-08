@@ -10,7 +10,7 @@
 //     FlangeBearingPanelHole( profile  )    - draw 2D panel holes
 //
 
-include <key-value.scad>
+include <KVTree.scad>
 include <utility.scad>
 
 //
@@ -18,99 +18,72 @@ include <utility.scad>
 //
 
     // run me !!!
-    //FlangeBearing2Bolts_Demo();
-    //translate( [0,-200,0] )
-    //    FlangeBearing4Bolts_Demo();
+    //FlangeBearing_Demo();
 
-    module FlangeBearing2Bolts_Demo() {
+    module FlangeBearing_Demo() {
 
-        profile1 = FlangeBearingProfile( shaftDiameter=8, boltDistance=37, boltCount=2, height=12 );
-        FlangeBearing( profile1 );
-        translate( [0,-80,0] )
-             linear_extrude( 3 )
-             difference() {
-                 square( [100,60], center=true );
-                 FlangeBearingPanelHole( profile1 );
-             }
-
-        profile2 = FlangeBearingProfile(
-            shaftDiameter = 10,
-            boltDiameter = 5, boltDistance = 80, boltCount=2, 
-            width = 100, depth = 60,
-            height = 20
-        );
-        translate( [150,0,0] ) {
-            FlangeBearing( profile2 );
-            translate( [0,-80,0] )
-                linear_extrude( 3 )
-                difference() {
-                    square( [100,60], center=true );
-                    FlangeBearingPanelHole( profile2, enlargeBolt=1 );
-                }
+        profile2a = FlangeBearingProfile(
+            shaftDiameter =  8,
+            boltDistance  = 37,
+            height        = 12 );
+        PartAndPanel() {
+            FlangeBearing( profile2a );
+            FlangeBearingPanelHole( profile2a );
         }
 
-        profile3 = FlangeBearingProfile(
-            shaftDiameter = 8,
-            boltDiameter = 5, boltDistance = 37, boltCount=2, 
-            width = 47, depth = 27,
-            height = 12, ringHeight=8, baseHeight=3
-        );
-        translate( [300,0,0] ) {
-            FlangeBearing( profile3 );
-            translate( [0,-80,0] )
-                linear_extrude( 3 )
-                difference() {
-                    square( [100,60], center=true );
-                    FlangeBearingPanelHole( profile3, omitCenterHole=false, enlargeShaft=2, enlargeBolt=1 );
-                }
+        profile2b = FlangeBearingProfile(
+            shaftDiameter =  10,
+            boltDiameter  =   5, 
+            boltDistance  =  80,
+            boltCount     =   2, 
+            height        =  20,
+            width         = 100,
+            depth         =  60 );
+        translate( [150,0,0] )
+        PartAndPanel() {
+            FlangeBearing( profile2b );
+            FlangeBearingPanelHole( profile2b, enlargeBolt=3 );
         }
-    }
-
-
-    module FlangeBearing4Bolts_Demo() {
-
-        profile1 = FlangeBearingProfile( shaftDiameter=8, boltDistance=37, boltCount=4, height=12 );
-        FlangeBearing( profile1 );
-        translate( [0,-80,0] )
-             linear_extrude( 3 )
-             difference() {
-                 square( [80,80], center=true );
-                 FlangeBearingPanelHole( profile1 );
-             }
-
-        profile2 = FlangeBearingProfile(
-            shaftDiameter = 10,
-            boltDiameter = 5, boltDistance = 50, boltCount=4, 
-            width = 60,
-            height = 20
-        );
-        translate( [150,0,0] ) {
-            FlangeBearing( profile2 );
-            translate( [0,-80,0] )
-                linear_extrude( 3 )
-                difference() {
-                    square( [80,80], center=true );
-                    FlangeBearingPanelHole( profile2, enlargeBolt=1 );
-                }
+        
+        profile4a = FlangeBearingProfile( 
+            shaftDiameter =  8,
+            boltDistance  = 37,
+            boltCount     =  4, 
+            height        = 12 );
+        translate( [300,0,0] )
+        PartAndPanel() {
+            FlangeBearing( profile4a );
+            FlangeBearingPanelHole( profile4a, omitCenterHole=false, enlargeShaft=5 );
         }
 
-        profile3 = FlangeBearingProfile(
-            shaftDiameter = 15,
-            boltDiameter = 5, boltDistance = 40, boltCount=4, 
-            width = 50,
-            height = 25, ringHeight=16, baseHeight=7
-        );
-        translate( [300,0,0] ) {
-            FlangeBearing( profile3 );
-            translate( [0,-80,0] )
+        profile4b = FlangeBearingProfile(
+            shaftDiameter =  10,
+            boltDiameter  =   5,
+            boltDistance  =  50,
+            boltCount     =   4, 
+            height        =  32,
+            ringHeight    =  25, 
+            baseHeight    =  10,
+            width         = 100,
+            depth         =  80 );
+        translate( [450,0,0] )
+        PartAndPanel() {
+            FlangeBearing( profile4b );
+            FlangeBearingPanelHole( profile4b );
+        }
+
+        module PartAndPanel() {
+            children(0);
+            translate( [0,-100,0] )
                 linear_extrude( 3 )
                 difference() {
-                    square( [80,80], center=true );
-                    FlangeBearingPanelHole( profile3, omitCenterHole=false, enlargeShaft=2, enlargeBolt=1 );
+                    square( [120,100], center=true );
+                    children(1);
                 }
         }
     }
 
+        
 //
 // CORE
 //
@@ -119,15 +92,15 @@ include <utility.scad>
         model = "",
         shaftDiameter,
         boltDistance, // bolt to bolt distance
-        height,
         boltCount    = 2,
+        height,
         boltDiameter = 5,
         width        = undef,
-        depth        = undef,        
+        depth        = undef,
         ringHeight   = undef,
         baseHeight   = undef
     ) = let (
-        e1=ErrorIf( shaftDiameter==undef, "shaftD diameter missing" ),
+        e1=ErrorIf( shaftDiameter==undef, "shaft diameter missing" ),
         e2=ErrorIf( boltDistance ==undef, "bolt distance missing"   ),
         e3=ErrorIf( boltCount!=2 && boltCount!=4, "invalid number of bolts [2|4]" ),
         e4=ErrorIf( height == undef, "height missing" ),
@@ -141,14 +114,14 @@ include <utility.scad>
         ),
         eRingHeight = SELECT( ringHeight, height*0.6 ),
         eBaseHeight = SELECT( baseHeight, height/3 )
-    ) KeyValue ([
+    ) KVTree([
         "type"         , "flange bearing",
         "model"        , model,
         "shaftDiameter", shaftDiameter,
-        "bolt"         , KeyValue([ "diameter", boltDiameter, "distance", boltDistance, "count", boltCount ]),
+        "bolt"         , KVTree([ "diameter", boltDiameter, "distance", boltDistance, "count", boltCount ]),
         "width"        , eWidth,
         "depth"        , eDepth,
-        "height"       , KeyValue([ "center", height, "ring", eRingHeight, "base", eBaseHeight ])
+        "height"       , KVTree([ "center", height, "ring", eRingHeight, "base", eBaseHeight ])
     ]);
 
     module FlangeBearing( profile ) {
@@ -234,7 +207,7 @@ include <utility.scad>
                         linear_extrude( baseHeight )
                             if ( cornerDiameters>0 )
                                 hull() {
-                                    circle( d=depth );
+                                    //circle( d=depth );
                                     translate( [ wOff, dOff,0] ) circle( d=cornerDiameters );
                                     translate( [ wOff,-dOff,0] ) circle( d=cornerDiameters );
                                     translate( [-wOff, dOff,0] ) circle( d=cornerDiameters );

@@ -13,7 +13,7 @@
 //     Nut( nutProfile )                 - draw 3D
 //
 
-include <key-value.scad>
+include <KVTree.scad>
 include <utility.scad>
 
 //
@@ -21,14 +21,20 @@ include <utility.scad>
 //
 
     // run me!!!
-    //Bolt_Demo();
-    //translate( [0,-40,0] ) Nut_Demo();
+    //NutsAndBolts_Demo();
 
-    module Bolt_Demo() {
-        //$fn=20;
+    module NutsAndBolts_Demo() {
+        //$fn=30;
         
-        profile = BoltProfile( shape="round", feature="none", shaftDiameter=5, length=20, headDiameter=10, headThickness=3 );
+        profile = BoltProfile(
+            shape         = "hex",  // "hex" | "square" | "round" 
+            feature       = "none", // "none" | "minus" | "plus" | "hex"
+            shaftDiameter = 5,
+            length        = 20,
+            headDiameter  = 10,
+            headThickness = 3 );
         Bolt( profile );
+
         translate( [0,-15,0] )
             linear_extrude( 3 )
             difference() {
@@ -41,20 +47,34 @@ include <utility.scad>
             translate( [20,0,0] ) featureVariation( "square" );
             translate( [40,0,0] ) featureVariation( "round" );
         }
+
+        translate( [0,-40,0] ) {
+            nut1 = NutProfile( shape="hex",    boltDiameter=5, nutDiameter=8, thickness=3 );
+            nut2 = NutProfile( shape="square", boltDiameter=5, nutDiameter=8, thickness=3 );
+            nut3 = NutProfile( shape="round",  boltDiameter=5, nutDiameter=8, thickness=3 );
+                                  Nut( nut1 );
+            translate( [10,0,0] ) Nut( nut2 );
+            translate( [20,0,0] ) Nut( nut3 );
+        }
+
         module featureVariation( shape ) {
-            b1 = BoltProfile( shape, shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );
-            generateBoltAndPanel( b1 );
-            translate( [0,25,0] ) {
+            b1 = BoltProfile( shape=shape, shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );
+            Bolt( b1 );
+            //generateBoltAndPanel( b1 );
+            translate( [0,15,0] ) {
                 b2 = BoltProfile( shape=shape, feature="minus", shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );
-                generateBoltAndPanel( b2 );
+                Bolt( b2 );
+                //generateBoltAndPanel( b2 );
             }
-            translate( [0,50,0] ) {
-                b3 = BoltProfile( shape=shape, feature="minus", shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );
-                generateBoltAndPanel( b3 );
+            translate( [0,30,0] ) {
+                b3 = BoltProfile( shape=shape, feature="plus", shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );
+                Bolt( b3 );
+                //generateBoltAndPanel( b3 );
             }
-            translate( [0,75,0] ) {
+            translate( [0,45,0] ) {
                 b4 = BoltProfile( shape=shape, feature="hex", shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );
-                generateBoltAndPanel( b4 );
+                Bolt( b4 );
+                //generateBoltAndPanel( b4 );
             }
         }
         module generateBoltAndPanel( profile ) {
@@ -64,17 +84,8 @@ include <utility.scad>
                 difference() {
                     square( [10,10], center=true );
                     BoltPanelHole( profile );
-            }
+                }
         }
-    }
-
-    module Nut_Demo() {
-        nut1 = NutProfile( shape="hex",    boltDiameter=5, nutDiameter=8, thickness=3 );
-        nut2 = NutProfile( shape="square", boltDiameter=3, nutDiameter=6, thickness=1 );
-        nut3 = NutProfile( shape="round",  boltDiameter=5, nutDiameter=8, thickness=2 );
-        Nut( nut1 );
-        translate( [10,0,0] ) Nut( nut2 );
-        translate( [20,0,0] ) Nut( nut3 );
     }
 
 //
@@ -96,12 +107,12 @@ include <utility.scad>
         e4=ErrorIf( length       ==undef, "length missing"         ),
         e5=ErrorIf( headDiameter ==undef, "head diameter missing"  ),
         e6=ErrorIf( headThickness==undef, "head thickness missing" )
-    ) KeyValue([
+    ) KVTree([
         "type"    , "bolt",
         "model"   , model,
         "diameter", shaftDiameter,
         "length"  , length,
-        "head"    , KeyValue([ "shape", shape, "diameter", headDiameter, "thickness", headThickness, "feature" , feature ])
+        "head"    , KVTree([ "shape", shape, "diameter", headDiameter, "thickness", headThickness, "feature" , feature ])
     ]);
 
     module Bolt( profile ) {
@@ -166,7 +177,7 @@ include <utility.scad>
 
     function NutProfile(
         model        = "",
-        shape        = "hex",
+        shape        = "hex", // "hex", "square", "round"
         boltDiameter = undef,
         nutDiameter  = undef,
         thickness    = undef
@@ -175,7 +186,7 @@ include <utility.scad>
         e2=ErrorIf( boltDiameter==undef, "bolt diameter missing" ),
         e3=ErrorIf( nutDiameter ==undef, "nut diameter missing"  ),
         e4=ErrorIf( thickness   ==undef, "thickness missing"     )
-    ) KeyValue([
+    ) KVTree([
         "type"        , "nut",
         "model"       , model,
         "shape"       , shape,
