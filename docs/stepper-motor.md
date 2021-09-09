@@ -44,40 +44,33 @@
 ---
 ## Data Structure
 ```
-type: "stepper motor"
-model: "Wantai 57BYGH420-2"
-nema: ""
-bodyDiameter: 56.4
-length =
-   all: 77
-   body: 57.6
-   bodyOnly: 56
-   frontCylinder: 1.6
-   backCylinder: 0
-   shaft: 19.4
-   backShaft: 0
-   frontFlange: 4.8
-   backFlange: 0
-shaft =
-   diameter: 6.35
-   length: 19.4
-backShaft =
-   diameter: 6.35
-   length: 0
-bolt =
-   diameter: 5
-   length: 10
-   distance: 47.14
-panelHole: 8.35
-frontCylinder =
-   diameter: 38.1
-   length: 1.6
-backCylinder =
-   diameter: 0
-   length: 0
-taper =
-   overall: 2.82
-   body: 1
+type         : "stepper motor"
+model        : "Wantai 57BYGH420-2"
+nema         : ""
+bodyDiameter : 56.4
+length       = all          : 77
+               body         : 57.6
+               bodyOnly     : 56
+               frontCylinder: 1.6
+               backCylinder : 0
+               shaft        : 19.4
+               backShaft    : 0
+               frontFlange  : 4.8
+               backFlange   : 0
+shaft        = diameter: 6.35
+               length  : 19.4
+backShaft    = diameter: 6.35
+               length  : 0
+bolt         = diameter: 5
+               length  : 10
+               distance: 47.14
+panelHole    : 8.35
+frontCylinder= diameter: 38.1
+               length  : 1.6
+backCylinder = diameter: 0
+               length  : 0
+taper        = overall: 2.82
+               body   : 1   
 ```
 
 ---
@@ -110,7 +103,7 @@ PartAndPanel() {
     StepperMotor( profile2 );
     StepperMotorPanelHoles( profile2, enlargeBolt=3 );
 };
-kvEcho( profile2 );
+kvEchoAligned( profile2 );
 
 // with gear, bolts on gear
 profile3 = StepperMotorProfile(

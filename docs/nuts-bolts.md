@@ -52,23 +52,22 @@
 ---
 ## Data Structure
 ```
-type: "bolt"
-model: "esV"
+type    : "bolt"
+model   : "esV"
 diameter: 5
-length: 20
-head =
-   shape: "hex"
-   diameter: 10
-   thickness: 3
-   feature: "none"
+length  : 20
+head    = shape    : "hex"
+          diameter : 10
+          thickness: 3
+          feature  : "none"
 ```
 ```
-type: "nut"
-model: "ella"
-shape: "hex"
+type        : "nut"
+model       : "ella"
+shape       : "hex"
 boltDiameter: 5
-nutDiameter: 8
-thickness: 3"
+nutDiameter : 8
+thickness   : 3
 ```
 
 ---

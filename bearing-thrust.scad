@@ -21,7 +21,7 @@ include <utility.scad>
 //
 
     // run me!!!
-    ThrustBearing_Demo();
+    //ThrustBearing_Demo();
 
     module ThrustBearing_Demo() {
         //$fn=50;
@@ -38,6 +38,8 @@ include <utility.scad>
         profile3 = ThrustBearingFromLibrary( "F12-21M" );
         translate( [100,0,0] )
             ThrustBearing( profile3, omitBalls=true );
+
+        kvEchoAligned( profile1 );
     }
 
 //

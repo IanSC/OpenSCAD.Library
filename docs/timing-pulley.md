@@ -42,6 +42,18 @@ this version is still suitable for 3D printing
 | toothWidthTweak = 0.2 | &nbsp;   | adjustments to fine tune 3D printing...
 | toothDepthTweak = 0   | &nbsp;   | ... see source timingPulleyNotchedCylinderCore()
 | **_return_**          |          | KVTree profile
+
+_Available Tooth Models for 3D Printing and Display:_
+&nbsp; &nbsp; &nbsp;MXL, 40DP, XL, L
+&nbsp; &nbsp; &nbsp;T2.5, T5, T10
+&nbsp; &nbsp; &nbsp;AT5
+&nbsp; &nbsp; &nbsp;HTD 3mm, HTD 5mm, HTD 8mm
+&nbsp; &nbsp; &nbsp;GT2 2mm, GT2 3mm, GT2 5mm
+
+_Additional for Display Only:_
+&nbsp; &nbsp; &nbsp;H
+&nbsp; &nbsp; &nbsp;AT10
+&nbsp; &nbsp; &nbsp;HTD 14mm
 <!--
 <table>
 <tr><td colspan="3"><h4>TimingPulleyProfile( ... )
@@ -124,44 +136,37 @@ this version is still suitable for 3D printing
 ---
 ## Data Structure
 ```
-type: "timing pulley"
-model: "pushy-101"
-toothModel: "GT2 2mm"
-toothCount: 60
-beltWidth: 12
+type         : "timing pulley"
+model        : "pushy-101"
+toothModel   : "GT2 2mm"
+toothCount   : 60
+beltWidth    : 12
 shaftDiameter: 6
-height =
-   total: 33
-   beltCenter: 24
-   belt: 12
-   topFlange: 3
-   bottomFlange: 3
-   hub: 15
-topFlange =
-   offset: 3
-   height: 3
-   taperHeight: 1
-   flatHeight: 2
-bottomFlange =
-   offset: 3
-   height: 3
-   taperHeight: 1
-   flatHeight: 2
-hub =
-   diameter: 20
-   height: 15
-nut =
-   shape: "hex"
-   boltDiameter: 3.2
-   nutDiameter: 5.7
-   thickness: 2.7
-captiveNuts =
-   count: 3
-   angleBetweenNuts: 120
-   offsetFromShaft: 1.2
-tweak =
-   toothWidth: 0
-   toothDepth: 0
+height       = total       : 33
+               beltCenter  : 24
+               belt        : 12
+               topFlange   : 3
+               bottomFlange: 3
+               hub         : 15
+topFlange    = offset     : 3
+               height     : 3
+               taperHeight: 1
+               flatHeight : 2
+bottomFlange = offset     : 3
+               height     : 3
+               taperHeight: 1
+               flatHeight : 2
+hub          = diameter: 20
+               height  : 15
+nut          = shape       : "hex"
+               boltDiameter: 3.2
+               nutDiameter : 5.7
+               thickness   : 2.7
+captiveNuts  = count           : 3
+               angleBetweenNuts: 120
+               offsetFromShaft : 1.2
+tweak        = toothWidth: 0.2
+               toothDepth: 0
 ```
 
 ---
@@ -228,4 +233,6 @@ translate( [150,0,0] ) {
 echo( TimingPulleyDiameter( "AT5", 64 ) );
 echo( TimingPulleyDiameter( "AT5", 20 ) );
 echo( TimingPulleyCenterDistanceByModel( "AT5", 64, 20, 700 ) );
+
+kvEchoAligned( profile1 );
 ```

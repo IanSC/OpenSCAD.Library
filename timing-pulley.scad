@@ -26,13 +26,15 @@ include <utility.scad>
 //
 
     // run me!!!
-    TimingPulley_Demo();
+    //TimingPulley_Demo();
     //TimingPulleyCompareDiameter_Test();
 
     module TimingPulley_Demo() {
 
         profile1 = TimingPulleyProfile(
-
+        
+            model              = "pushy-101",
+        
             toothModel         = "GT2 2mm",
             toothCount         =   60,
             beltWidth          =   12,
@@ -91,6 +93,8 @@ include <utility.scad>
         echo( TimingPulleyDiameter( "AT5", 64 ) );
         echo( TimingPulleyDiameter( "AT5", 20 ) );
         echo( TimingPulleyCenterDistanceByModel( "AT5", 64, 20, 700 ) );
+
+        kvEchoAligned( profile1 );
     }
 
     module TimingPulleyCompareDiameter_Test() {
@@ -99,9 +103,9 @@ include <utility.scad>
         // this will affect distance calculations
         // given belt length
         toothCount = 100;
-        for( model = pulleyModelsFor3DP ) {
-            a = PulleyDiameter( model, toothCount );
-            b = pulleyToothData( model, toothCount )[0];
+        for( model = timingPulleyModelsFor3DP ) {
+            a = TimingPulleyDiameter( model, toothCount );
+            b = timingPulleyToothData( model, toothCount )[0];
             p = abs( (a-b)/a )*100;
             if ( p > 1 ) {
                 echo( str( model, " diff by ", p ) );
@@ -302,6 +306,46 @@ include <utility.scad>
         // tweaks for 3D printing are kept also, for different values for each pulley configuration
         "tweak"        , KVTree([ "toothWidth", toothWidthTweak, "toothDepth", toothDepthTweak ])
     ]);
+
+    function TimingPulleyProfileCAD(
+        //
+        //   +-----------------------+   ---                  ---
+        //   |                       |   topFlangeHeight      topFlange
+        //   +-----------------------+   ---                  ---
+        //      |||||||||||||||||||
+        //      |||||||||||||||||||      beltWidth            notchedCylinder   
+        //      |||||||||||||||||||
+        //   +-----------------------+   ---                  ---
+        //   |                       |   bottomFlangeHeight   bottomFlange
+        //   +-------+-------+-------+   ---                  ---
+        //           |       |           hubHeight            hub
+        //           +-------+           ---                  ---
+        //                     -->|  |<- flange offset
+        //
+        model = "",          // user defined name
+        toothModel,          // "T5", "GT2 2mm"...
+        toothCount,
+        beltWidth,
+        shaftDiameter,
+        flangeOffset,
+        topFlangeHeight,
+        bottomFlangeHeight,
+        hubInfo              // [ diameter, height ]
+    ) = let (
+        eTOffset = (flangeOffset==0||topFlangeHeight   ==0)?0:flangeOffset,
+        eTHeight = (flangeOffset==0||topFlangeHeight   ==0)?0:topFlangeHeight,
+        eBOffset = (flangeOffset==0||bottomFlangeHeight==0)?0:flangeOffset,
+        eBHeight = (flangeOffset==0||bottomFlangeHeight==0)?0:bottomFlangeHeight
+    ) TimingPulleyProfile(
+        model            = model,
+        toothModel       = toothModel,
+        toothCount       = toothCount,
+        beltWidth        = beltWidth,
+        shaftDiameter    = shaftDiameter,
+        topFlangeInfo    = [ eTOffset, 0, eTHeight ],
+        bottomFlangeInfo = [ eBOffset, 0, eBHeight ],
+        hubInfo          = hubInfo        
+    );
 
 //
 // COMPUTED PULLEY DIAMETER FROM CHARTS

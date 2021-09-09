@@ -31,9 +31,6 @@ include <utility.scad>
             "model", "ABC123"
         ]);
         
-        echo( "\n\n ECHO: kvEcho()" );
-        kvEcho( table );
-
         echo( "\n\n KEYS/VALUES: kvKeys()/kvValues()" );
         echo( kvKeys  ( table ) );          // ["solo", "notSure", "fruit", "color", "animal", "model"]
         echo( kvKeys  ( table, "color" ) ); // ["red", "green", "blue"]
@@ -84,7 +81,7 @@ include <utility.scad>
         echo( kvSearchOCD( table, "missingKey", defaultValue="dunno", ifKeyMissing="missing" ) ); // "missing"
         echo( kvSearchOCD( table, "notSure"   , defaultValue="dunno", ifKeyMissing="missing" ) ); // "dunno"
 
-        echo( "\n\n FUNCTION" );
+        echo( "\n\n FUNCTIONS" );
         mathPack = KVTree([
             "+", function(x,y) x+y,
             "-", function(x,y) x-y,
@@ -93,6 +90,10 @@ include <utility.scad>
         ]);
         echo( kvGet(mathPack,"+")(10,20) ); // 30
         echo( kvGet(mathPack,"x")(10,20) ); // 200
+        
+        echo( "\n\n ECHO:" );
+        kvEcho( table );
+        kvEchoAligned( table );
     }
 
 //
@@ -191,14 +192,32 @@ include <utility.scad>
 //
 
     module kvEcho(table) {
-        echo( show(table,"") );        
+        echo( show(table,"") );
         function show(a,indent) =
             stringJoin([
                 for( i=[0:len(a)-1] )
-                ( is_list(a[i][1]) ) ?            
+                ( is_list(a[i][1]) ) ?
                     str( "\n", indent, key(a[i][0]), " =", show(a[i][1],str(indent,"   ")) )
                 :
                     str( "\n", indent, key(a[i][0]), ": ", value(a[i][1]) )
+            ]);
+        function key(k)   = is_undef (k) ? "<undef>"  : k;
+        function value(v) = is_undef (v) ? "<undef>"  :
+                            is_string(v) ? str("\"",v,"\"") : v;
+    }
+
+    module kvEchoAligned(table) {
+        echo( str("\n", show(table,0) ) );
+        function show(a,indent) = let (
+            keyLen = listOperator( kvKeys(a), function(x,y) max(x,y), function(x) len(x))
+        )
+            stringJoin([
+                for( i=[0:len(a)-1] )
+                let(eIndent=(i==0)?0:indent)
+                ( is_list(a[i][1]) ) ?
+                    str( stringRepeat(" ",eIndent), stringPad(key(a[i][0]),keyLen), "= ", show(a[i][1],indent+keyLen+2) )
+                :
+                    str( stringRepeat(" ",eIndent), stringPad(key(a[i][0]),keyLen), ": ", value(a[i][1]), "\n" )
             ]);
         function key(k)   = is_undef (k) ? "<undef>"  : k;
         function value(v) = is_undef (v) ? "<undef>"  :

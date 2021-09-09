@@ -2,43 +2,63 @@ include <timing-pulley.scad>
 include <stepper-motor.scad>
 
     // run me!!!
-    //StepperMotorAssembly_Test();
+    //StepperMotorAssembly_Demo();
 
-    module StepperMotorAssembly_Test() {
+    module StepperMotorAssembly_Demo() {
 
-        motorProfile = StepperMotorBuildProfile( bodyWidth=42.20, bodyHeight=35+40, shaftDiameter=5, shaftLength=18,
-            boltDiameter = 4, boltLength = 5, boltToBoltDistance = 20,
-            upperCylinderDiameter=38, upperCylinderHeight=40,
-            upperFlangeHeight=4.8, betweenFlangeTaper=-1 );
-
-        motorPulleyProfile = PulleyBuildCADProfile(
-            model          = "GT2 2mm",
-            teethCount     = 20,
-            beltWidth      = 8,
-            shaftDiameter  = 5,
-            retainerHeight = 1,
-            idlerHeight    = 1,
-            baseDiameter   = 16,
-            baseHeight     = 6
+        motorProfile = StepperMotorProfile(
+            bodyDiameter    = 42.20,
+            bodyLength      = 40, 
+            shaftDiameter   = 5,
+            shaftLength     = 18,
+            boltDiameter    = 4,
+            boltLength      = 5,
+            boltDistance    = 20,
+            frontCylinder   = [ 38, 30 ],
+            flangeThickness = [ 4.8, 0 ],
+            bodyTaper       = 1
         );
 
-        drivenPulleyProfile = PulleyBuildCADProfile(
-            model          = "GT2 2mm",
-            teethCount     = 60,
-            beltWidth      = 8,
-            shaftDiameter  = 8,
-            retainerHeight = 1.5,
-            idlerHeight    = 1.5,
-            baseDiameter   = 20,
-            baseHeight     = 6
+        motorizedPulleyProfile = TimingPulleyProfileCAD(
+            toothModel         = "GT2 2mm",
+            toothCount         = 20,
+            beltWidth          = 8,
+            shaftDiameter      = 5,
+            flangeOffset       = 2,
+            topFlangeHeight    = 1,
+            bottomFlangeHeight = 1,
+            hubInfo            = [ 16, 6 ]
         );
 
-        StepperMotorAssembly( motorProfile, motorPulleyProfile, drivenPulleyProfile, 158, 3, false );
+        drivenPulleyProfile = TimingPulleyProfileCAD(
+            toothModel         = "GT2 2mm",
+            toothCount         = 60,
+            beltWidth          = 8,
+            shaftDiameter      = 8,
+            flangeOffset       = 2,
+            topFlangeHeight    = 1.5,
+            bottomFlangeHeight = 1.5,
+            hubInfo            = [ 20, 6 ]
+        );
+        
+        beltLength = 158;
+        
+        StepperMotorAssembly( motorProfile,
+            motorizedPulleyProfile, drivenPulleyProfile, beltLength = beltLength, 
+            pulleyOffset = 3, reverseDrivenPulley = true );
+        
+        c2c   = TimingPulleyCenterDistance( motorizedPulleyProfile, drivenPulleyProfile, beltLength );
+        shaft = kvGet( drivenPulleyProfile, "shaftDiameter" );
+        translate([c2c,0,0])
+            cylinder( 100, d=shaft );
     }
     
-    module StepperMotorAssembly( motorProfile, motorPulleyProfile, drivenPulleyProfile, beltLength, pulleyOffset, 
-    reverseDrivenPulley = false ) {
+    module StepperMotorAssembly( motorProfile, motorizedPulleyProfile, drivenPulleyProfile, beltLength,
+    pulleyOffset=0, beltWidth, beltThickness=2,
+    reverseDrivenPulley = false, omitTeeth=false, showBelt=true ) {
         StepperMotor( motorProfile );
         translate( [0,0,pulleyOffset])
-            PulleyDual( motorPulleyProfile, drivenPulleyProfile, beltLength, reverseDrivenPulley );
+            TimingPulleyConnected( profile1=motorizedPulleyProfile, profile2=drivenPulleyProfile, beltLength=beltLength,
+                beltWidth=beltWidth, beltThickness=beltThickness,
+                reversed=reverseDrivenPulley, omitTeeth=omitTeeth, showBelt=showBelt );
     }

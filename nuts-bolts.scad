@@ -26,20 +26,20 @@ include <utility.scad>
     module NutsAndBolts_Demo() {
         //$fn=30;
         
-        profile = BoltProfile(
+        boltProfile = BoltProfile(
             shape         = "hex",  // "hex" | "square" | "round" 
             feature       = "none", // "none" | "minus" | "plus" | "hex"
             shaftDiameter = 5,
             length        = 20,
             headDiameter  = 10,
             headThickness = 3 );
-        Bolt( profile );
+        Bolt( boltProfile );
 
         translate( [0,-15,0] )
             linear_extrude( 3 )
             difference() {
                 square( [10,10], center=true );
-                BoltPanelHole( profile );
+                BoltPanelHole( boltProfile );
             }
 
         translate( [30,0,0] ) {
@@ -48,14 +48,18 @@ include <utility.scad>
             translate( [40,0,0] ) featureVariation( "round" );
         }
 
+        nut1 = NutProfile( shape="hex",    boltDiameter=5, nutDiameter=8, thickness=3 );
+        nut2 = NutProfile( shape="square", boltDiameter=5, nutDiameter=8, thickness=3 );
+        nut3 = NutProfile( shape="round",  boltDiameter=5, nutDiameter=8, thickness=3 );
+
         translate( [0,-40,0] ) {
-            nut1 = NutProfile( shape="hex",    boltDiameter=5, nutDiameter=8, thickness=3 );
-            nut2 = NutProfile( shape="square", boltDiameter=5, nutDiameter=8, thickness=3 );
-            nut3 = NutProfile( shape="round",  boltDiameter=5, nutDiameter=8, thickness=3 );
                                   Nut( nut1 );
             translate( [10,0,0] ) Nut( nut2 );
             translate( [20,0,0] ) Nut( nut3 );
         }
+
+        kvEchoAligned( boltProfile );
+        kvEchoAligned( nut1 );
 
         module featureVariation( shape ) {
             b1 = BoltProfile( shape=shape, shaftDiameter=3, length=15, headDiameter=6, headThickness=3 );

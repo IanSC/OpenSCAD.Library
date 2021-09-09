@@ -199,3 +199,23 @@ animal =
          lilac: 80
 model: "ABC123"
 ```
+Console for kvEchoAligned():
+```
+solo   : 0
+notSure: <undef>
+fruit  = apple : 1
+         banana: 2
+         carrot: 3
+color  = red  : "meat"
+         green: "grass"
+         blue : "sky"
+animal = dog= breed= poodle   : 10
+                     chihuahua: 20
+              color= white: 30
+                     brown: 40
+         cat= breed= siamese: 50
+                     persian: 60
+              color= cream: 70
+                     lilac: 80
+model  : "ABC123"
+```

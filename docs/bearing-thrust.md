@@ -32,10 +32,10 @@
 ---
 ## Data Structure
 ```
-type: "thrust bearing"
-model: "51102"
-ID: 15
-OD: 28
+type     : "thrust bearing"
+model    : "51102"
+ID       : 15
+OD       : 28
 thickness: 9
 ```
 

@@ -17,7 +17,7 @@ include <utility.scad>
 //
 
     // run me!!!
-    StepperMotor_Demo();
+    //StepperMotor_Demo();
 
     module StepperMotor_Demo() {
         
@@ -47,7 +47,7 @@ include <utility.scad>
             StepperMotor( profile2 );
             StepperMotorPanelHoles( profile2, enlargeBolt=3 );
         };
-        kvEcho( profile2 );
+        kvEchoAligned( profile2 );
 
         // with gear, bolts on gear
         profile3 = StepperMotorProfile(

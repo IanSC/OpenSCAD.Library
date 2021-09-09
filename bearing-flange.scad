@@ -72,6 +72,8 @@ include <utility.scad>
             FlangeBearingPanelHole( profile4b );
         }
 
+        kvEchoAligned( profile4b );
+
         module PartAndPanel() {
             children(0);
             translate( [0,-100,0] )

@@ -38,19 +38,17 @@
 ---
 ## Data Structure
 ```
-type: "flange bearing"
-model: "FB-100"
+type         : "flange bearing"
+model        : "FB-100"
 shaftDiameter: 10
-bolt =
-   diameter: 5
-   distance: 50
-   count: 4
-width: 100
-depth: 80
-height =
-   center: 32
-   ring: 25
-   base: 10
+bolt         = diameter: 5
+               distance: 50
+               count   : 4
+width        : 100
+depth        : 80
+height       = center: 32
+               ring  : 25
+               base  : 10
 ```
 
 ---
@@ -106,6 +104,8 @@ PartAndPanel() {
     FlangeBearing( profile4b );
     FlangeBearingPanelHole( profile4b );
 }
+
+kvEchoAligned( profile4b );
 
 module PartAndPanel() {
     children(0);
