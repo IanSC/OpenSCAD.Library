@@ -56,22 +56,24 @@ include <utility.scad>
             Box( faceIn=true );
 
         module BoxDefault() {
-            OTop   (THK, 0  , 0  , H/2) color("green" ,0.5) Panel( W,D   );             // move up only
-            OBottom(THK, 0  , 0  , H/2) color("red"   ,0.5) Panel( W,D   );             // move down only
-            OFront (THK, 0  , D/2, 0  ) color("blue"  ,0.5) Panel( W,  H-THK*2 );       // facing front
-            OBack  (THK, 0  , D/2, 0  ) color("yellow",0.5) Panel( W,  H-THK*2 );       // facing front
-            OLeft  (THK, W/2, 0  , 0  ) color("purple",0.6) Panel(   D-THK*2,H-THK*2 ); // facing right
-            ORight (THK, W/2, 0  , 0  ) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 ); // facing left
+            // less: THK*2, so no overlap
+            OTop   (THK, H/2 ) color("green" ,0.5) Panel( W,D               ); // move up only
+            OBottom(THK, H/2 ) color("red"   ,0.5) Panel( W,D               ); // move down only
+            OFront (THK, D/2 ) color("blue"  ,0.5) Panel( W,        H-THK*2 ); // facing front
+            OBack  (THK, D/2 ) color("yellow",0.5) Panel( W,        H-THK*2 ); // facing front
+            OLeft  (THK, W/2 ) color("purple",0.6) Panel(   D-THK*2,H-THK*2 ); // facing right
+            ORight (THK, W/2 ) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 ); // facing left
             CubeExtents( W,D,H, color="red" );
         }
 
         module Box( faceIn ) {
-            OTop   (THK, 0  , 0  , H/2, faceIn) color("green" ,0.5) Panel( W,D   );
-            OBottom(THK, 0  , 0  , H/2, faceIn) color("red"   ,0.5) Panel( W,D   );
-            OFront (THK, 0  , D/2, 0  , faceIn) color("blue"  ,0.5) Panel( W,  H-THK*2 );
-            OBack  (THK, 0  , D/2, 0  , faceIn) color("yellow",0.5) Panel( W,  H-THK*2 );
-            OLeft  (THK, W/2, 0  , 0  , faceIn) color("purple",0.6) Panel(   D-THK*2,H-THK*2 );
-            ORight (THK, W/2, 0  , 0  , faceIn) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 );
+            // less: THK*2, so no overlap
+            OTop   (THK, H/2, faceIn=faceIn) color("green" ,0.5) Panel( W,D               );
+            OBottom(THK, H/2, faceIn=faceIn) color("red"   ,0.5) Panel( W,D               );
+            OFront (THK, D/2, faceIn=faceIn) color("blue"  ,0.5) Panel( W,        H-THK*2 );
+            OBack  (THK, D/2, faceIn=faceIn) color("yellow",0.5) Panel( W,        H-THK*2 );
+            OLeft  (THK, W/2, faceIn=faceIn) color("purple",0.6) Panel(   D-THK*2,H-THK*2 );
+            ORight (THK, W/2, faceIn=faceIn) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 );
             CubeExtents( W,D,H, color="red" );
         }
 
@@ -104,13 +106,13 @@ include <utility.scad>
     // these are intended for making panels for enclosures
     // so point of view, is as if the user is inside the box/house
 
-    module OTop( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=false ) {
+    module OTop( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=false ) {
         // panel drawn on X/Y axis centered at 0
         // when placed on top, just lift up the same as drawn
         // drawn face is outside the enclosure, default to face outwards
-        // +upDown ==> move HIGHER
-        // -upDown ==> move LOWER
-        translate( [leftRight,frontBack,upDown] )
+        // +offset ==> move HIGHER
+        // -offset ==> move LOWER
+        translate( [leftRight,frontBack,offset] )
         translate( [0,0,-thickness/2] )
         if ( faceIn )
             rotate( [0,180,0] ) children();
@@ -118,13 +120,13 @@ include <utility.scad>
             children();
     }
     
-    module OBottom( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
+    module OBottom( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=true ) {
         // panel drawn on X/Y axis centered at 0
         // when moved downward, natural orientation is the same as drawn
         // as if looking at the floor, so default is to face inward
-        // +upDown ==> move LOWER
-        // -upDown ==> move HIGHER
-        translate( [leftRight,frontBack,-upDown] )
+        // +offset ==> move LOWER
+        // -offset ==> move HIGHER
+        translate( [leftRight,frontBack,-offset] )
         translate( [0,0,thickness/2] )
         if ( faceIn )
             children();
@@ -133,13 +135,13 @@ include <utility.scad>
     }
 
 
-    module OFront( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=false ) {
+    module OFront( thickness=0, offset=0, leftRight=0, upDown=0, faceIn=false ) {
         // panel drawn on X/Y axis centered at 0
         // when positioned, put on the front as if viewing the front of house from outside
         // oriented same was as drawn, default to facing outwards
-        // +frontBack ==> move towards FRONT
-        // -frontBack ==> move BACKWARDS
-        translate( [leftRight,-frontBack,upDown] )
+        // +offset ==> move towards FRONT
+        // -offset ==> move BACKWARDS
+        translate( [leftRight,-offset,upDown] )
         rotate( [90,0,0] )
         translate( [0,0,-thickness/2] )
         if ( faceIn )
@@ -148,13 +150,13 @@ include <utility.scad>
             children();
     }
 
-    module OBack( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
+    module OBack( thickness=0, offset=0, leftRight=0, upDown=0, faceIn=true ) {
         // panel drawn on X/Y axis centered at 0
         // when positioned, put on the back as if viewing wall to backdoor
         // oriented same drawn, default to facing inwards
-        // +frontBack ==> move BACKWARDS
-        // -frontBack ==> move towards FRONT
-        translate( [leftRight,frontBack,upDown] )
+        // +offset ==> move BACKWARDS
+        // -offset ==> move towards FRONT
+        translate( [leftRight,offset,upDown] )
         rotate( [90,0,0] )
         translate( [0,0,thickness/2] )
         if ( faceIn )
@@ -163,13 +165,13 @@ include <utility.scad>
             rotate( [0,180,0] ) children();
     }
 
-    module OLeft( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
+    module OLeft( thickness=0, offset=0, frontBack=0, upDown=0, faceIn=true ) {
         // drawn X/Y axis centered by user
         // when positioned, put on the left as if viewing left wall
         // oriented same was as drawn, default to facing inwards
-        // +leftRight ==> move LEFT
-        // -leftRight ==> move RIGHT
-        translate( [-leftRight,frontBack,upDown] )
+        // +offset ==> move LEFT
+        // -offset ==> move RIGHT
+        translate( [-offset,frontBack,upDown] )
         rotate( [90,0,90] )
         translate( [0,0,thickness/2] )
         if ( faceIn )
@@ -178,13 +180,13 @@ include <utility.scad>
             rotate( [0,180,0] ) children();
     }
 
-    module ORight( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
+    module ORight( thickness=0, offset=0, frontBack=0, upDown=0, faceIn=true ) {
         // panel drawn on X/Y axis centered at 0
         // when positioned, put on the right as if viewing right wall
         // oriented same was as drawn, default to facing inwards
-        // +rightLeft ==> move RIGHT
-        // -leftRight ==> move LEFT
-        translate( [leftRight,frontBack,upDown] )
+        // +offset ==> move RIGHT
+        // -offset ==> move LEFT
+        translate( [offset,frontBack,upDown] )
         rotate( [90,0,-90] )
         translate( [0,0,thickness/2] )
         if ( faceIn )
