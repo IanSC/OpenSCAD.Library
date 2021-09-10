@@ -367,3 +367,31 @@
     //    }
     //}    
     
+//
+// GRAPHICAL
+//
+
+    //Graphical_Demo(); 
+    module Graphical_Demo() {
+        CubeExtents( 50,40,60, color="red" );
+        color("green",0.5) cube([50,40,60],center=true);
+    }
+
+    module CubeExtents( width, depth, height, size=1, color=undef ) {
+        w = (width+size)/2;
+        d = (depth+size)/2;
+        h = (height+size)/2;
+        C() {
+            translate([ w, d, h]) cube([size,size,size],center=true);
+            translate([ w, d,-h]) cube([size,size,size],center=true);
+            translate([ w,-d, h]) cube([size,size,size],center=true);
+            translate([ w,-d,-h]) cube([size,size,size],center=true);
+            translate([-w, d, h]) cube([size,size,size],center=true);
+            translate([-w, d,-h]) cube([size,size,size],center=true);
+            translate([-w,-d, h]) cube([size,size,size],center=true);
+            translate([-w,-d,-h]) cube([size,size,size],center=true);
+        }
+        module C() {
+            if ( color==undef ) children(); else color(color) children();
+        }
+    }

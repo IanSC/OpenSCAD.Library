@@ -6,7 +6,7 @@ Searchable tree data structure for storing multiple values.
 [check it out](./docs/KVTree.md)
 
 ---
-### Hardwares
+### Hardware
 Uses KVTree to create profiles. A profile stores all parameters to render a hardware. Store various configurations for reuse.
 
 #### Nuts and Bolts
@@ -28,6 +28,11 @@ Uses KVTree to create profiles. A profile stores all parameters to render a hard
 #### Timing Pulley
 ![photo](/images/timing-pulley.png)
 [check it out](./docs/timing-pulley.md)
+
+---
+### Orientation
+Routines for positioning panels to form a box.
+[check it out](./docs/orientation.md)
 
 ---
 ### Utilities

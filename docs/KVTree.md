@@ -91,6 +91,7 @@ Searchable tree data structure for storing multiple values.
 | kvSearchOCD() | ERROR         | defaultValue | ifMissingKey | defaultValue   |
 
 ---
+## Sample Code
 ```
 table = KeyValue([
     "solo"   , 0,

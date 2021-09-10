@@ -84,7 +84,7 @@
 <tr><td><b><i>return<td>string
 </table>
 
----
+<br>
 
 ```
 echo("\n\n stringJoin():");
@@ -150,7 +150,7 @@ echo( stringPadLeft("television",5,trimIfExcess=true) ); // "ision"
 <tr><td><b><i>return  <td>string
 </table>
 
----
+<br>
 
 ```
 echo("\n\n numRound(value,decPlace=2):");
@@ -196,7 +196,7 @@ ex. <i>function(x) x*x</i>, square each item before doing operation
 <tr><td><b><i>return<td>value from supplied function fOperation()
 </table>
 
----
+<br>
 
 ```
 echo("\n\n listSum(): start,end");
@@ -231,3 +231,24 @@ echo( listOperator( [ "a","b","c" ],
     function(x,y) str(x,"-",y) ) );                 // "a-b-c"
 ```
 
+---
+## Graphical Functions
+<table>
+<tr><td><b>CubeExtents</b>( width, depth, height )</td><td>draw markers for verifying extents</td></tr>
+</table>
+
+#### _CubeExtents( width, depth, height, size )_
+<table>
+<tr><td>width <td>width (x-axis)
+<tr><td>depth <td>depth (y-axis)
+<tr><td>height<td>height (z-axis)
+<tr><td>size = 1<td>size of markers
+</table>
+
+<br>
+
+![photo](/images/utility-graphical.png)
+```
+CubeExtents( 50,40,60, color="red" );
+color("green",0.5) cube([50,40,60],center=true);
+```

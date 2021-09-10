@@ -1,100 +1,95 @@
-//------------------
-// orientation.scad
-//------------------
-// by Ian Co 2021
+//
+// ORIENTATION
+// by ISC 2021
 //
 // routines to easily position panels
 //
 
+include <utility.scad>
+
 //
-// EXAMPLE
+// DEMO
 //
 
     // run me!!!
-    //Orientation_Example();    
-    //translate( [0,100,0] )
-    //    Orientation_Basic();
+    //Orientation_Demo_Basic();
+    translate( [0,100,0] )
+        Orientation_Demo();
     
-    module Orientation_Basic() {
-        OFront(3,0,0,0,false) color( "green" )
-            cube( [50,50,3], center=true );        
-        OBack(3,0,0,0,false) color( "red" )
-            cube( [50,50,3], center=true );
-        OLeft(3,0,0,0,false) color( "blue" )
-            cube( [50,50,3], center=true );        
-        ORight(3,0,0,0,false) color( "yellow" )
-            cube( [50,50,3], center=true );
-        OTop(3,0,0,0,false) color( "violet" )
-            cube( [50,50,3], center=true );        
-        OBottom(3,0,0,0,false) color( "orange" )
-            cube( [50,50,3], center=true );
+    module Orientation_Demo_Basic() {
+        // shows default positioning of panels
+        
+        W   = 50; // width
+        D   = 50; // depth
+        H   = 50; // height
+        THK = 3;  // thickness of panel
+        
+        OTop   (THK) color( "green"  ) cube([ W,D  ,THK ],center=true);
+        OBottom(THK) color( "red"    ) cube([ W,D  ,THK ],center=true);
+        OFront (THK) color( "blue"   ) cube([ W,  H,THK ],center=true);
+        OBack  (THK) color( "yellow" ) cube([ W,  H,THK ],center=true);
+        OLeft  (THK) color( "purple" ) cube([   D,H,THK ],center=true);
+        ORight (THK) color( "tomato" ) cube([   D,H,THK ],center=true);
     }
 
-    module Orientation_Example() {
+    module Orientation_Demo() {
         
         $fn=20;
         
-        width     = 20;
-        depth     = 30;
-        height    = 40;
-        thickness = 3;
+        W   = 40; // width
+        D   = 50; // depth
+        H   = 80; // height
+        THK = 3;  // thickness of panel
         
-        translate( [-40,0,0] )
-            Panel(width,depth,3);
+        Panel(W,D);
 
+        // panels default orientation
+        translate( [100,0,0] )
+            BoxDefault();
+        
         // panels facing outwards
-        Box( faceIn=false );
+        translate( [200,0,0] )
+            Box( faceIn=false );
         
         // panels facing inwards
-        translate( [50,0,0] )
+        translate( [300,0,0] )
             Box( faceIn=true );
 
-        module Box( faceIn ) {
-            OBottom(thickness,0,0,0,faceIn)
-                Panel( width,depth,thickness );
-            OTop(thickness,0,0,height,faceIn)
-                Panel( width,depth,thickness );
-            OLeft(thickness,width/2,0,height/2,faceIn)
-                Panel( depth,height,thickness );
-            ORight(thickness,width/2,0,height/2,faceIn)
-                Panel( depth,height,thickness );
-            OFront(thickness,0,depth/2,height/2,faceIn)
-                Panel( width,height,thickness );
-            OBack(thickness,0,depth/2,height/2,faceIn)
-                Panel( width,height,thickness );
-            color( "red" )
-                translate( [0,0,height/2] )
-                BoxExtents( width,depth,height );
+        module BoxDefault() {
+            OTop   (THK, 0  , 0  , H/2) color("green" ,0.5) Panel( W,D   );             // move up only
+            OBottom(THK, 0  , 0  , H/2) color("red"   ,0.5) Panel( W,D   );             // move down only
+            OFront (THK, 0  , D/2, 0  ) color("blue"  ,0.5) Panel( W,  H-THK*2 );       // facing front
+            OBack  (THK, 0  , D/2, 0  ) color("yellow",0.5) Panel( W,  H-THK*2 );       // facing front
+            OLeft  (THK, W/2, 0  , 0  ) color("purple",0.6) Panel(   D-THK*2,H-THK*2 ); // facing right
+            ORight (THK, W/2, 0  , 0  ) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 ); // facing left
+            CubeExtents( W,D,H, color="red" );
         }
 
-        module Panel( width,height,thickness ) {
-            linear_extrude( thickness, center=true )
+        module Box( faceIn ) {
+            OTop   (THK, 0  , 0  , H/2, faceIn) color("green" ,0.5) Panel( W,D   );
+            OBottom(THK, 0  , 0  , H/2, faceIn) color("red"   ,0.5) Panel( W,D   );
+            OFront (THK, 0  , D/2, 0  , faceIn) color("blue"  ,0.5) Panel( W,  H-THK*2 );
+            OBack  (THK, 0  , D/2, 0  , faceIn) color("yellow",0.5) Panel( W,  H-THK*2 );
+            OLeft  (THK, W/2, 0  , 0  , faceIn) color("purple",0.6) Panel(   D-THK*2,H-THK*2 );
+            ORight (THK, W/2, 0  , 0  , faceIn) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 );
+            CubeExtents( W,D,H, color="red" );
+        }
+
+        module Panel( width,height ) {
+            linear_extrude( THK, center=true )
             difference() {
                 square( [width,height], center=true );
                 {
-                    translate( [width*.25,height*.25,0] )
+                    translate( [width*.25,-height*.25,0] )
                         square( [width/4,height/4], center=true );
                     translate( [-width*.25,-height*.25,0] )
                         circle( d=width/4 );
+                    translate( [0,height*.25,0] )
+                        text("H3LLO",size=6,halign="center",valign="center");
                 }
             }
         }
         
-    }
-
-    module BoxExtents( width, depth, height ) {
-        size = 1;
-        w = (width+size)/2;
-        d = (depth+size)/2;
-        h = (height+size)/2;
-        translate([ w, d, h]) cube([size,size,size],center=true);
-        translate([ w, d,-h]) cube([size,size,size],center=true);
-        translate([ w,-d, h]) cube([size,size,size],center=true);
-        translate([ w,-d,-h]) cube([size,size,size],center=true);
-        translate([-w, d, h]) cube([size,size,size],center=true);
-        translate([-w, d,-h]) cube([size,size,size],center=true);
-        translate([-w,-d, h]) cube([size,size,size],center=true);
-        translate([-w,-d,-h]) cube([size,size,size],center=true);
     }
 
 //
@@ -106,9 +101,29 @@
             children();
     }
 
+    // these are intended for making panels for enclosures
+    // so point of view, is as if the user is inside the box/house
+
+    module OTop( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=false ) {
+        // panel drawn on X/Y axis centered at 0
+        // when placed on top, just lift up the same as drawn
+        // drawn face is outside the enclosure, default to face outwards
+        // +upDown ==> move HIGHER
+        // -upDown ==> move LOWER
+        translate( [leftRight,frontBack,upDown] )
+        translate( [0,0,-thickness/2] )
+        if ( faceIn )
+            rotate( [0,180,0] ) children();
+        else
+            children();
+    }
+    
     module OBottom( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
-        // face the same way as drawn, so default face inward
-        // upDown ==> go LOWER
+        // panel drawn on X/Y axis centered at 0
+        // when moved downward, natural orientation is the same as drawn
+        // as if looking at the floor, so default is to face inward
+        // +upDown ==> move LOWER
+        // -upDown ==> move HIGHER
         translate( [leftRight,frontBack,-upDown] )
         translate( [0,0,thickness/2] )
         if ( faceIn )
@@ -117,10 +132,15 @@
             rotate( [0,180,0] ) children();
     }
 
-    module OTop( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=false ) {
-        // usually just lift up, so default facing outwards
-        // upDown ==> go HIGHER
-        translate( [leftRight,frontBack,upDown] )
+
+    module OFront( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=false ) {
+        // panel drawn on X/Y axis centered at 0
+        // when positioned, put on the front as if viewing the front of house from outside
+        // oriented same was as drawn, default to facing outwards
+        // +frontBack ==> move towards FRONT
+        // -frontBack ==> move BACKWARDS
+        translate( [leftRight,-frontBack,upDown] )
+        rotate( [90,0,0] )
         translate( [0,0,-thickness/2] )
         if ( faceIn )
             rotate( [0,180,0] ) children();
@@ -128,9 +148,27 @@
             children();
     }
 
+    module OBack( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
+        // panel drawn on X/Y axis centered at 0
+        // when positioned, put on the back as if viewing wall to backdoor
+        // oriented same drawn, default to facing inwards
+        // +frontBack ==> move BACKWARDS
+        // -frontBack ==> move towards FRONT
+        translate( [leftRight,frontBack,upDown] )
+        rotate( [90,0,0] )
+        translate( [0,0,thickness/2] )
+        if ( faceIn )
+            children();
+        else
+            rotate( [0,180,0] ) children();
+    }
+
     module OLeft( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
-        // usually viewing from inside the "box", so default face inwards
-        // leftRight ==> go LEFT
+        // drawn X/Y axis centered by user
+        // when positioned, put on the left as if viewing left wall
+        // oriented same was as drawn, default to facing inwards
+        // +leftRight ==> move LEFT
+        // -leftRight ==> move RIGHT
         translate( [-leftRight,frontBack,upDown] )
         rotate( [90,0,90] )
         translate( [0,0,thickness/2] )
@@ -141,8 +179,11 @@
     }
 
     module ORight( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
-        // usually viewing from inside the "box", so default face inwards
-        // rightLeft ==> go RIGHT
+        // panel drawn on X/Y axis centered at 0
+        // when positioned, put on the right as if viewing right wall
+        // oriented same was as drawn, default to facing inwards
+        // +rightLeft ==> move RIGHT
+        // -leftRight ==> move LEFT
         translate( [leftRight,frontBack,upDown] )
         rotate( [90,0,-90] )
         translate( [0,0,thickness/2] )
@@ -151,28 +192,3 @@
         else
             rotate( [0,180,0] ) children();
     }
-
-    module OFront( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=false ) {
-        // usually viewing as drawn, so default face outwards
-        // frontBack ==> go FRONT
-        translate( [leftRight,-frontBack,upDown] )
-        rotate( [90,0,0] )
-        translate( [0,0,-thickness/2] )
-        if ( faceIn )
-            rotate( [0,180,0] ) children();    
-        else
-            children();
-    }
-
-    module OBack( thickness=0, leftRight=0, frontBack=0, upDown=0, faceIn=true ) {
-        // usually viewing as drawn, so default face inwards
-        // frontBack ==> go BACK
-        translate( [leftRight,frontBack,upDown] )
-        rotate( [90,0,0] )
-        translate( [0,0,thickness/2] )
-        if ( faceIn )
-            children();
-        else
-            rotate( [0,180,0] ) children();    
-    }
-
