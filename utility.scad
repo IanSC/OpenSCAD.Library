@@ -377,7 +377,7 @@
         color("green",0.5) cube([50,40,60],center=true);
     }
 
-    module CubeExtents( width, depth, height, size=1, color=undef ) {
+    module CubeExtents( width, depth, height, size=1, color="red" ) {
         w = (width+size)/2;
         d = (depth+size)/2;
         h = (height+size)/2;

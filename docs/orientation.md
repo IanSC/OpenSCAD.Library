@@ -1,4 +1,5 @@
 # Orientation
+Routines to quickly position panels on the face of a box.
 
 ---
 ## List of Functions
@@ -69,44 +70,44 @@
 ## Sample Code
 ![photo](/images/orientation.png)
 ```
+axis();
+Panel(50,50);
+color("SteelBlue") OFront (THK,50) Panel(50,50);
+color("red")       OBack  (THK,50) Panel(50,50);
+color("green")     OLeft  (THK,50) Panel(50,50);
+color("violet")    ORight (THK,50) Panel(50,50);
+color("orange")    OTop   (THK,50) Panel(50,50);
+color("Gold")      OBottom(THK,50) Panel(50,50);
+
 W   = 40; // width
 D   = 50; // depth
 H   = 80; // height
-THK = 3;  // thickness of panel
-
-Panel(W,D);
-
-// panels default orientation
-translate( [100,0,0] )
-    BoxDefault();
-
+THK =  3; // thickness of panel
+        
 // panels facing outwards
-translate( [200,0,0] )
+translate( [110,0,0] )
     Box( faceIn=false );
 
 // panels facing inwards
-translate( [300,0,0] )
+translate( [200,0,0] )
     Box( faceIn=true );
 
-module BoxDefault() {
-    // less: THK*2, so no overlap
-    OTop   (THK, H/2 ) color("green" ,0.5) Panel( W,D               ); // move up only
-    OBottom(THK, H/2 ) color("red"   ,0.5) Panel( W,D               ); // move down only
-    OFront (THK, D/2 ) color("blue"  ,0.5) Panel( W,        H-THK*2 ); // facing front
-    OBack  (THK, D/2 ) color("yellow",0.5) Panel( W,        H-THK*2 ); // facing front
-    OLeft  (THK, W/2 ) color("purple",0.6) Panel(   D-THK*2,H-THK*2 ); // facing right
-    ORight (THK, W/2 ) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 ); // facing left
-    CubeExtents( W,D,H, color="red" );
+module axis() {
+    color("red") {
+        cube([100,1,1],center=true);
+        cube([1,100,1],center=true);
+        cube([1,1,100],center=true);
+    }
 }
 
 module Box( faceIn ) {
     // less: THK*2, so no overlap
-    OTop   (THK, H/2, faceIn=faceIn) color("green" ,0.5) Panel( W,D               );
-    OBottom(THK, H/2, faceIn=faceIn) color("red"   ,0.5) Panel( W,D               );
-    OFront (THK, D/2, faceIn=faceIn) color("blue"  ,0.5) Panel( W,        H-THK*2 );
-    OBack  (THK, D/2, faceIn=faceIn) color("yellow",0.5) Panel( W,        H-THK*2 );
-    OLeft  (THK, W/2, faceIn=faceIn) color("purple",0.6) Panel(   D-THK*2,H-THK*2 );
-    ORight (THK, W/2, faceIn=faceIn) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 );
+    OBottom(THK, H/2, faceIn=faceIn) color("Gold"     ) Panel( W,D               );
+    OLeft  (THK, W/2, faceIn=faceIn) color("green"    ) Panel(   D-THK*2,H-THK*2 );
+    OBack  (THK, D/2, faceIn=faceIn) color("red"      ) Panel( W,        H-THK*2 );
+    OTop   (THK, H/2, faceIn=faceIn) color("orange"   ) Panel( W,D               );
+    ORight (THK, W/2, faceIn=faceIn) color("violet"   ) Panel(   D-THK*2,H-THK*2 );
+    OFront (THK, D/2, faceIn=faceIn) color("SteelBlue") Panel( W,        H-THK*2 );
     CubeExtents( W,D,H, color="red" );
 }
 
