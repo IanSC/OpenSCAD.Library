@@ -14,7 +14,7 @@ include <KVTree.scad>
 //
 
     // run me !!!
-    //$vpr = [0,0,0]; Notch_Demo_2D();
+    //$vpr=[0,0,0]; Notch_Demo_2D();
     //Notch_Demo();
     //Notch_Assembly_Demo();
 
@@ -462,7 +462,6 @@ include <KVTree.scad>
         }
     }
     
-    //module notchFemale(targetWidth,notches,notchProfile,fromEdge=false,leftGap=0,rightGap=0) {
     module notchFemale(targetWidth,notches,profile,fromEdge,leftGap=0,rightGap=0) {
         // holes to receive notches
 

@@ -11,18 +11,18 @@
 ---
 #### _NotchProfile( ... )_
 <table>
-<tr><td>panelThickness          <td>1A,2A<td>used for both notchHeight and holeHeight
-<tr><td>notchHeight             <td>1B   <td>height of notches, if not specified will use panelThickness
-<tr><td>holeHeight              <td>2B   <td>height of notch hole, if not specified will use panelThickness
-<tr><td>notchWidthAllowance = 0 <td>        <td>adjustment of notch width, eg. make it smaller to fit notch holes
-<tr><td>notchHeightAllowance = 0<td>        <td>adjustment of notch height, eg. make it shorter to avoid protruding out the other side when inserted
-<tr><td>holeWidthAllowance = 0  <td>        <td>adjustment of hole width, eg. make it bigger to fit notches
-<tr><td>holeHeightAllowance = 0 <td>        <td>adjustment of hole height, eg. make it bigger to fit notches
-<tr><td>punchGap                <td>        <td>optional default parameters for Notch() and NotchEdge()
-<tr><td>leftGap = 0             <td>        <td>... see Notch() and NotchEdge()
-<tr><td>rightGap = 0            <td>        <td>...
-<tr><td>fromEdge                <td>        <td>...
-<tr><td>additive                <td>        <td>...
+<tr><td>panelThickness          <td>&#10004;1<td>used for both notchHeight and holeHeight
+<tr><td>notchHeight             <td>&#10004;2<td>height of notches, if not specified will use panelThickness
+<tr><td>holeHeight              <td>&#10004;2<td>height of notch hole, if not specified will use panelThickness
+<tr><td>notchWidthAllowance = 0 <td>         <td>adjustment of notch width, eg. make it smaller to fit notch hole width
+<tr><td>notchHeightAllowance = 0<td>         <td>adjustment of notch height, eg. make it shorter to avoid protruding out the other side when inserted
+<tr><td>holeWidthAllowance = 0  <td>         <td>adjustment of hole width, eg. make it bigger to fit notch width
+<tr><td>holeHeightAllowance = 0 <td>         <td>adjustment of hole height, eg. make it bigger to fit notch height
+<tr><td>punchGap                <td>         <td>optional default parameters for Notch() and NotchEdge()
+<tr><td>leftGap = 0             <td>         <td>... see Notch() and NotchEdge()
+<tr><td>rightGap = 0            <td>         <td>...
+<tr><td>fromEdge                <td>         <td>...
+<tr><td>additive                <td>         <td>...
 <tr><td colspan="2"><b><i>return<td>KVTree profile
 </table>
 
