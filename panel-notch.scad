@@ -15,57 +15,57 @@ include <KVTree.scad>
 
     // run me !!!
     //$vpr=[0,0,0]; Notch_Demo_2D();
-    //Notch_Demo();
+    Notch_Demo();
     //Notch_Assembly_Demo();
 
     module Notch_Demo_2D() {
         
         include <orientation.scad>
         
-        nProfile1 = NotchProfile( panelThickness = 3 );
-        nProfile2 = NotchProfile( panelThickness = 3,
+        profile1 = NotchProfile( panelThickness = 3 );
+        profile2 = NotchProfile( panelThickness = 3,
             notchWidthAllowance  = -1, holeWidthAllowance  = 1,
             notchHeightAllowance =  3, holeHeightAllowance = 1,
             leftGap = 10, rightGap = 10
         );
-        kvEchoAligned(nProfile2);
+        kvEchoAligned(profile2);
         
         // gray patches were punched out
-        translate([  0,  0,0]) demoM( 80,nProfile1,false,"gray")  Notch    ( 80,  2, nProfile1 );
-        translate([  0, 35,0]) demoM( 80,nProfile1,false,"gray")  NotchEdge( 80,  2, nProfile1 );
-        translate([  0, 60,0]) demoF( 80,                "gray")  Notch    ( 80, -2, nProfile1 );
+        translate([  0,  0,0]) demoM( 80,profile1,"gray")  Notch    (  80,  2, profile1 );
+        translate([  0, 35,0]) demoM( 80,profile1,"gray")  NotchEdge(  80,  2, profile1 );
+        translate([  0, 60,0]) demoF( 80,         "gray")  Notch    (  80, -2, profile1 );
 
         // green patches were added
-        translate([ 90,  0,0]) demoM( 80,nProfile1,true ,"green") Notch    ( 80,  2, nProfile1, additive=true );
-        translate([ 90, 35,0]) demoM( 80,nProfile1,true ,"green") NotchEdge( 80,  2, nProfile1, additive=true );
+        translate([ 90,  0,0]) demoM( 80,profile1,"green") Notch    (  80,  2, profile1, additive=true  );
+        translate([ 90, 35,0]) demoM( 80,profile1,"green") NotchEdge(  80,  2, profile1, additive=true  );
 
         // gray patches were punched out
-        translate([190,  0,0]) demoM(100,nProfile2,false,"gray")  Notch    (100,  2, nProfile2                 );
-        translate([190, 35,0]) demoM(100,nProfile2,false,"gray")  Notch    (100,  2, nProfile2, punchGap=false );
-        translate([190, 70,0]) demoM(100,nProfile2,false,"gray")  NotchEdge(100,  2, nProfile2                 );
-        translate([190,105,0]) demoM(100,nProfile2,false,"gray")  NotchEdge(100,  2, nProfile2, punchGap=false );
-        translate([190,130,0]) demoF(100,                "gray")  Notch    (100, -2, nProfile2                 );
+        translate([190,  0,0]) demoM(100,profile2,"gray")  Notch    ( 100,  2, profile2                 );
+        translate([190, 35,0]) demoM(100,profile2,"gray")  Notch    ( 100,  2, profile2, punchGap=false );
+        translate([190, 70,0]) demoM(100,profile2,"gray")  NotchEdge( 100,  2, profile2                 );
+        translate([190,105,0]) demoM(100,profile2,"gray")  NotchEdge( 100,  2, profile2, punchGap=false );
+        translate([190,130,0]) demoF(100,         "gray")  Notch    ( 100, -2, profile2                 );
         
-        module demoM(panelWidth,notchProfile,additive,color) {
+        module demoM(width,profile,color) {
+            color("red") translate([0,0,1]) square([width,0.5],center=true); // origin
             difference() {
-                panelOnly(panelWidth,notchProfile,additive);
+                union() {
+                    translate([0,-10,0]) square([width,20],center=true); // panel top at origin
+                    nHa=kvGet(profile,"notch.heightAllowance");
+                    if (nHa>0) // notchHeightAllowance above origin
+                        translate([0,nHa/2-0.5,0]) square([width,nHa+1],center=true);
+                }
                 children();
             }
             color(color) children();
         }
-        module demoF(panelWidth,color) {
+        module demoF(width,color) {
+            color("red") translate([0,0,1]) square([width,0.5],center=true); // origin
             difference() {
-                square([panelWidth,20],center=true);
+                square([width,20],center=true);
                 children();
             }
             color(color) children();
-        }
-        module panelOnly(panelWidth,notchProfile,additive=false) {
-            nHa = kvGet( notchProfile, "notch.heightAllowance" );
-            if (additive || nHa<=0) // panel top at origin
-                translate([0,-10,0]) square([panelWidth,20],center=true);
-            else // move top of panel above origin by notchHeightAllowance
-                translate([0,-10+nHa/2,0]) square([panelWidth,20+nHa],center=true);
         }
     }
 
@@ -74,70 +74,75 @@ include <KVTree.scad>
         include <orientation.scad>
         
         panelThickness = 3;
-        nProfile1 = NotchProfile( panelThickness = panelThickness );
-        nProfile2 = NotchProfile( panelThickness = panelThickness,
+        profile1 = NotchProfile( panelThickness = panelThickness );
+        profile2 = NotchProfile( panelThickness = panelThickness,
             notchWidthAllowance  = -1, holeWidthAllowance  = 1,
             notchHeightAllowance =  3, holeHeightAllowance = 1,
             leftGap = 10, rightGap = 10
         );
 
-        // male/female
-        solid() malePanel2D(80,2,nProfile1);
-        color( "green", 0.5 )
-            OBack( panelThickness )
-            solid() femalePanel2D(80,2,nProfile1);
+        // *** MALE/FEMALE ***
+        translate([0,0,0]) {
+            solid() malePanel(80,profile1)
+            
+            /* ▶ */     Notch( 80, 2, profile1 );
+            
+            OBack(panelThickness) color("green",0.5) solid() femalePanel(80)
+            
+            /* ▶ */     Notch( 80, -2, profile1 );
+        }
 
-        // male/male
-        translate( [0,50,0] ) {
-            OTop(panelThickness)
-                solid() malePanel2D(80,2,nProfile1);
-            color( "green", 0.5 )
-                OBack( panelThickness )
-                solid() malePanelOutside2D(80,2,nProfile1,punchGap=false);
+        // *** MALE/MALE BROMANCE ***
+        translate([0,50,0]) {
+            OTop(panelThickness) solid() malePanel(80,profile1)
+            
+            /* ▶ */     Notch( 80, 2, profile1 );
+            
+            OBack(panelThickness) color("green",0.5) solid() malePanel(80,profile1)
+                
+            /* ▶ */     NotchEdge( 80, 2, profile1, punchGap=false );
         }
         
-        // male/female with adjustment/gaps
-        translate( [0,100,0] ) {
-            solid() malePanel2D(100,2,nProfile2);
-            color( "green", 0.5 )
-                OBack( panelThickness )
-                solid() femalePanel2D(100,2,nProfile2);
+        // *** MALE/FEMALE WITH ADJUSTMENTS ***
+        translate([0,100,0]) {
+            solid() malePanel(100,profile2)
+            
+            /* ▶ */     Notch( 100, 2, profile2 );
+            
+            OBack(panelThickness) color("green",0.5) solid() femalePanel(100)
+            
+            /* ▶ */     Notch( 100, -2, profile2 );
         }
             
-        // male/male with adjustment/gaps
-        translate( [0,150,0] ) {
-            OTop(panelThickness)
-                solid() malePanel2D(100,2,nProfile2);
-            color( "green", 0.5 )
-                OBack( panelThickness )
-                solid() malePanelOutside2D(100,2,nProfile2,punchGap=false);
+        // *** MALE/MALE BROMANCE WITH ADJUSTMENTS ***
+        translate([0,150,0]) {
+            OTop(panelThickness) solid() malePanel(100,profile2)
+            
+            /* ▶ */     Notch( 100, 2, profile2 );
+            
+            OBack(panelThickness) color("green",0.5) solid() malePanel(100,profile2)
+            
+            /* ▶ */     NotchEdge( 100, 2, profile2, punchGap=false );
         }
 
         module solid() linear_extrude(panelThickness,center=true) children();
-        module malePanel2D(panelWidth,notches,notchProfile,punchGap=true) {
+        
+        module malePanel(width,profile) {
             difference() {
-                panelOnly(panelWidth,notchProfile);
-                Notch(panelWidth,notches,notchProfile,punchGap=punchGap);
+                union() {
+                    translate([0,-10,0]) square([width,20],center=true); // panel top at origin
+                    nHa=kvGet(profile,"notch.heightAllowance");
+                    if (nHa>0) // notchHeightAllowance above origin
+                        translate([0,nHa/2-0.5,0]) square([width,nHa+1],center=true);
+                }
+                children();
             }
         }
-        module malePanelOutside2D(panelWidth,notches,notchProfile,punchGap=true) {
+        module femalePanel(width) {
             difference() {
-                panelOnly(panelWidth,notchProfile);
-                NotchEdge(panelWidth,notches,notchProfile,punchGap=punchGap);
+                square([width,20],center=true);
+                children();
             }
-        }
-        module femalePanel2D(panelWidth,notches,notchProfile) {
-            difference() {
-                square([panelWidth,20],center=true);
-                Notch(panelWidth,-notches,notchProfile);
-            }
-        }
-        module panelOnly(panelWidth,notchProfile,additive=false) {
-            nHa = kvGet( notchProfile, "notch.heightAllowance" );
-            if (additive || nHa<=0) // panel top at origin
-                translate([0,-10,0]) square([panelWidth,20],center=true);
-            else // move top of panel above origin by notchHeightAllowance
-                translate([0,-10+nHa/2,0]) square([panelWidth,20+nHa],center=true);
         }
     }
 
@@ -155,7 +160,7 @@ include <KVTree.scad>
         SF1 = S1+T/2;   // shelf1 front panel height
         SF2 = H-S2+T/2; // shelf2 front panel height
         
-        notchProfile = NotchProfile(panelThickness=T);
+        profile = NotchProfile(panelThickness=T);
         
         assembly();
         translate([120,0,0])
@@ -186,12 +191,12 @@ include <KVTree.scad>
             punch() {
                 square([D,H],center=true);
                 union() {                    
-                    MUp(S1) PBottom(H) Notch    (D,-2,notchProfile); // holes for shelf bottom
-                    MUp(S2) PBottom(H) Notch    (D,-2,notchProfile);
-                            PRight(D)  NotchEdge(H,3,notchProfile);  // back panel
+                    MUp(S1) PBottom(H) Notch    (D,-2,profile); // holes for shelf bottom
+                    MUp(S2) PBottom(H) Notch    (D,-2,profile);
+                            PRight(D)  NotchEdge(H,3,profile);  // back panel
                     // shelves front panel
-                    PLeft(D) NotchEdge(H,1,notchProfile,punchGap=false,rightGap=H-SF1);
-                    PLeft(D) NotchEdge(H,2,notchProfile,punchGap=false,leftGap =H-SF2);
+                    PLeft(D) NotchEdge(H,1,profile,punchGap=false,rightGap=H-SF1);
+                    PLeft(D) NotchEdge(H,2,profile,punchGap=false,leftGap =H-SF2);
                 }
             }
         }
@@ -199,10 +204,10 @@ include <KVTree.scad>
             punch() {
                 square([W,H],center=true);
                 union() {                    
-                            PLeft(W)   Notch(H,3,notchProfile);  // walls
-                            PRight(W)  Notch(H,3,notchProfile);
-                    MUp(S1) PBottom(H) Notch(W,-2,notchProfile); // shelves bottom
-                    MUp(S2) PBottom(H) Notch(W,-2,notchProfile);
+                            PLeft(W)   Notch(H,3,profile);  // walls
+                            PRight(W)  Notch(H,3,profile);
+                    MUp(S1) PBottom(H) Notch(W,-2,profile); // shelves bottom
+                    MUp(S2) PBottom(H) Notch(W,-2,profile);
                 }
             }
         }
@@ -210,10 +215,10 @@ include <KVTree.scad>
             punch() {
                 square([W,D],center=true);
                 union() {                    
-                    PLeft(W)   Notch    (D,2,notchProfile); // walls
-                    PRight(W)  Notch    (D,2,notchProfile);
-                    PBottom(D) NotchEdge(W,2,notchProfile); // front
-                    PTop(D)    Notch    (W,2,notchProfile); // back
+                    PLeft(W)   Notch    (D,2,profile); // walls
+                    PRight(W)  Notch    (D,2,profile);
+                    PBottom(D) NotchEdge(W,2,profile); // front
+                    PTop(D)    Notch    (W,2,profile); // back
                 }
             }
         }
@@ -221,9 +226,9 @@ include <KVTree.scad>
             punch() {
                 square([W,SF1],center=true);
                 union() {
-                    PLeft(W)  Notch(SF1,1,notchProfile); // walls
-                    PRight(W) Notch(SF1,1,notchProfile);
-                    PTop(SF1) Notch(W,2,notchProfile);   // front
+                    PLeft(W)  Notch(SF1,1,profile); // walls
+                    PRight(W) Notch(SF1,1,profile);
+                    PTop(SF1) Notch(W,2,profile);   // front
                 }
             }
         }
@@ -231,9 +236,9 @@ include <KVTree.scad>
             punch() {
                 square([W,SF2],center=true);
                 union() {                    
-                    PLeft(W)     Notch(SF2,2,notchProfile); // walls
-                    PRight(W)    Notch(SF2,2,notchProfile);
-                    PBottom(SF2) Notch(W,2,notchProfile);   // front
+                    PLeft(W)     Notch(SF2,2,profile); // walls
+                    PRight(W)    Notch(SF2,2,profile);
+                    PBottom(SF2) Notch(W,2,profile);   // front
                 }
             }
         }
