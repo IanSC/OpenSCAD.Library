@@ -2,7 +2,7 @@
 // PANEL-NOTCHES
 // by ISC 2021
 //
-//     NotchProfile( ... )                              - create profile
+//     NotchProfile( ... )                         - create profile
 //     Notch( targetWidth, notches, profile )      - draw 2D centered notches or notch holes
 //     NotchEdge( targetWidth, notches, profile  ) - draw notches/holes edge to edge
 //
@@ -15,7 +15,7 @@ include <KVTree.scad>
 
     // run me !!!
     //$vpr=[0,0,0]; Notch_Demo_2D();
-    Notch_Demo();
+    //Notch_Demo();
     //Notch_Assembly_Demo();
 
     module Notch_Demo_2D() {
@@ -283,13 +283,13 @@ include <KVTree.scad>
     //  |                   |
 
     function NotchProfile(
-        panelThickness,           // set only this to default notch notchHeight, holeHeight
+        panelThickness,           // settings for both notchHeight and holeHeight
         notchHeight,              // height of notch, usually same as panel thickness
         holeHeight,               // height of holes, usually same as panel thickness
-        notchWidthAllowance = 0,  // allowance when creating notches, - smaller, to fit notches
+        notchWidthAllowance  = 0, // allowance when creating notches, - smaller, to fit notches
         notchHeightAllowance = 0, // to adjust protrusion to the other face when inserted
-        holeWidthAllowance = 0,   // allowance when creating holes, + bigger, to for notches
-        holeHeightAllowance = 0,  // ...
+        holeWidthAllowance   = 0, // allowance when creating holes, + bigger, to for notches
+        holeHeightAllowance  = 0, // ...
                                   // params to Notch()/NotchEdge(), for default
                                   // but can be overridden when calling those modules
         punchGap = undef,         
@@ -386,7 +386,7 @@ include <KVTree.scad>
         // for difference() to panels
         
         overlap    = 1; // extra on top for clean punch
-        gapOverlap = 0.001;
+        gapOverlap = 0.0001;
         
         notch       = kvGet(profile,"notch");
         notchHeight = kvGet(notch,"height"         );
@@ -403,7 +403,7 @@ include <KVTree.scad>
         div        = notches*2+1;
         punchWidth = effWidth/div;
         
-        // notchHeightAllowance >= 0, higher notches
+        // notchHeightAllowance > 0, higher notches
         //
         //    increase notch height
         //    move pattern up by heightAllowance
@@ -425,7 +425,7 @@ include <KVTree.scad>
         //         +---###---+     F - female panel
         //         | M       |     M - male panel
         //
-        // notchHeightAllowance <= 0, increase notch height below origin
+        // notchHeightAllowance < 0, increase notch height below origin
         //
         //    use same cutting depth without allowance
         //    remove strip on top of the whole panel, female still anchored on origin
@@ -450,19 +450,40 @@ include <KVTree.scad>
             //   |   +---+   +---+   |
             //   |                   |
 
+            effOffset=eGapLeft/2-eGapRight/2;
+
             // we are punching so reverse allowance and notch positions
-            translate( [eGapLeft/2-eGapRight/2,-eHeight/2+overlap/2,0] )
-            notchRepeater(effWidth,notches,!eFromEdge)
-                square( [punchWidth-nWa,eHeight+overlap], center=true );
-            
+            translate( [effOffset,-eHeight/2+overlap/2,0] ) {
+                notchRepeater(effWidth,notches,!eFromEdge)
+                    square( [punchWidth-nWa,eHeight+overlap], center=true );
+                if (nWa>0) {
+                    // width was increased, therefore punch was reduced
+                    // there will be leftoever material on the leftmost/rightmost
+                    // notch which will not be present had it been additive
+                    offset  =effWidth/2-gapOverlap/2-nWa/4;
+                    gapWidth=gapOverlap*2+nWa/2;
+                    //color("green") translate([0,2,0])
+                    translate([-offset,0,0] )
+                        square([gapWidth,eHeight+overlap],center=true);
+                    //color("green") translate([0,2,0])
+                    translate([offset,0,0])
+                        square([gapWidth,eHeight+overlap],center=true);
+                }
+
+            }
+            if (nHa<0) {
+                // remove strip from top
+                translate([effOffset,nHa/2+overlap/2,0])
+                    square([effWidth+gapOverlap*2,-nHa+overlap],center=true);
+            }
             if (ePunchGap) {
                 // punch out left/right gaps
                 if (eGapLeft!=0) // && eGapLeft<=targetWidth)
-                    translate( [-targetWidth/2-gapOverlap,-eHeight,0] )
-                    square( [eGapLeft+gapOverlap,eHeight+overlap] );
+                    translate([-targetWidth/2-gapOverlap,-eHeight,0])
+                    square([eGapLeft+gapOverlap*2,eHeight+overlap]);
                 if (eGapRight!=0) // && eGapRight<=targetWidth)
-                    translate( [targetWidth/2-eGapRight,-eHeight,0] )
-                    square( [eGapRight+gapOverlap,eHeight+overlap] );
+                    translate([targetWidth/2-eGapRight,-eHeight,0])
+                    square([eGapRight+gapOverlap*2,eHeight+overlap]);
             }
         }
     }
@@ -484,9 +505,9 @@ include <KVTree.scad>
         div       = notches*2+1;
         holeWidth = effWidth/div;
         
-        translate( [eGapLeft/2-eGapRight/2,0,0] )
+        translate([eGapLeft/2-eGapRight/2,0,0])
         notchRepeater(effWidth,notches,eFromEdge)
-            square( [holeWidth+hWa,holeHeight+hHa], center=true );
+            square([holeWidth+hWa,holeHeight+hHa],center=true);
         
         if (eFromEdge && hWa==0) {
             // if widthAllowance +, will already punch cleanly
@@ -494,12 +515,12 @@ include <KVTree.scad>
             // if widthAllowance 0, add extra to punch cleanly
             overlap = 1;
             if (eGapLeft==0) {
-                translate( [-targetWidth/2,0,0] )
-                    square( [overlap,holeHeight+hHa], center=true );
+                translate([-targetWidth/2,0,0])
+                    square([overlap,holeHeight+hHa],center=true);
             }
             if (eGapRight==0) {
-                translate( [targetWidth/2,0,0] )
-                    square( [overlap,holeHeight+hHa], center=true );
+                translate([targetWidth/2,0,0])
+                    square([overlap,holeHeight+hHa],center=true);
             }
         }
     }
@@ -519,11 +540,11 @@ include <KVTree.scad>
         //    ###   ###
         // +--   ---   --+
         // |             |
-        div = notches*2+1;
-        notchSize = targetWidth/div;
-        translate( [-(notches-1)*notchSize,0,0] )
-        for (i = [0:notches-1]) {
-            translate( [i*notchSize*2,0,0] )
+        div      =notches*2+1;
+        notchSize=targetWidth/div;
+        translate([-(notches-1)*notchSize,0,0])
+        for( i=[0:notches-1] ) {
+            translate([i*notchSize*2,0,0])
             children();
         }        
     }
@@ -532,11 +553,11 @@ include <KVTree.scad>
         // ###   ###   ###
         // |  ---   ---  |
         // |             |
-        div = notches*2+1;
-        notchSize = targetWidth/div;
-        translate( [-notches*notchSize,0,0] )
-        for (i = [0:notches]) {
-            translate( [i*notchSize*2,0,0] )
+        div      =notches*2+1;
+        notchSize=targetWidth/div;
+        translate([-notches*notchSize,0,0])
+        for( i=[0:notches] ) {
+            translate([i*notchSize*2,0,0])
             children();
         }                
     }

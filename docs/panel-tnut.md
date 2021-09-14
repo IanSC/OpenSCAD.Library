@@ -1,12 +1,14 @@
 # Panel T-Nut Cage
+Create T-Nut, captured bolt and nut, on panels.
 
 ---
 ## List of Functions
 <table>
 <tr><td><b>TNutCageProfile</b>( ... )</td><td>create profile
-<tr><td><b>TNutCage</b>( profile )</td><td>generate 2D bolt/nut capture slots
-<tr><td><b>TNutCagePanelHole</b>( profile )</td><td>generate 2D hole for perpendicular connected panel
-<tr><td><b>TNutCages</b>( targetWidth, count, profile )</td><td>repeat several TNutCage() or TNutCagePanelHole() along targetWidth
+<tr><td><b>TNutCage_M</b>( profile )</td><td>generate 2D bolt/nut capture slots
+<tr><td><b>TNutCage_F</b>( profile )</td><td>generate 2D hole for perpendicular connected panel
+<tr><td><b>TNutCage</b>( targetWidth, count, profile )</td><td>repeat several TNutCage_M() or TNutCage_F() along targetWidth<br/>
+                                                               switch between M and F versions by changing +/- on notches
 </table>
 
 ---
@@ -27,24 +29,25 @@
 <tr><td colspan="2"><b><i>return<td>KVTree profile
 </table>
 
-#### _TNutCage( profile, connectedPanelThickness )_
+#### _TNutCage_M( profile, connectedPanelThickness )_
 <table>
 <tr><td>profile                <td>&#10004;<td>profile to generate
 <tr><td>connectedPanelThickness<td>        <td>override connected panel thickness in profile
 </table>
 
-#### _TNutCagePanelHole( profile, allowance )_
+#### _TNutCage_F( profile, allowance )_
+Create holes to partner with TNutCage_M()
 <table>
 <tr><td>profile      <td>&#10004;<td>profile to generate hole for connecting perpendicular panel
 <tr><td>allowance = 0<td>        <td>enlarge/reduce generated hole
 </table>
 
-#### _TNutCages( targetWidth, count, profile, connectedPanelThickness, holeAllowance )_
+#### _TNutCage( targetWidth, count, profile, connectedPanelThickness, holeAllowance )_
 <table>
 <tr><td>targetWidth            <td>&#10004;<td>width to generate for
 <tr><td>count                  <td>&#10004;<td>number of repetitions:<br/>
-                                               (+) number of bolt/nut cage<br/>
-                                               (-) number of holes for connected panel
+                                               (+) number of bolt/nut cage, use TNutCage_M()<br/>
+                                               (-) number of holes for connected panel, use TNutCage_F()
 <tr><td>profile                <td>&#10004;<td>profile to use
 <tr><td>connectedPanelThickness<td>        <td>override connected panel thickness in profile
 <tr><td>allowance = 0          <td>        <td>enlarge/reduce generated hole
@@ -96,11 +99,11 @@ profile2 = TNutCageProfile(
 translate([0,0,0]) {
     malePanel(20)
     
-    /* ▶ */     TNutCage( profile1 );
+    /* ▶ */     TNutCage_M( profile1 );
     
     femalePanel(20,panelThickness,boltDiameter)
     
-    /* ▶ */     TNutCagePanelHole( profile1 );
+    /* ▶ */     TNutCage_F( profile1 );
     
     translate([0,panelThickness,0]) dummyBolt();
     translate([0,-nutEdgeGap,0]) dummyNut();
@@ -111,11 +114,11 @@ translate([30,0,0]) {
     THK=5;
     malePanel(20)
 
-    /* ▶ */     TNutCage( profile1, connectedPanelThickness=THK );
+    /* ▶ */     TNutCage_M( profile1, connectedPanelThickness=THK );
     
     femalePanel(20,THK,boltDiameter)
     
-    /* ▶ */     TNutCagePanelHole( profile1 );
+    /* ▶ */     TNutCage_F( profile1 );
     
     translate([0,THK,0]) dummyBolt();
     translate([0,-nutEdgeGap,0]) dummyNut();
@@ -125,25 +128,25 @@ translate([30,0,0]) {
     translate([60,0,0]) {
     malePanel(20)
     
-    /* ▶ */     TNutCage( profile2 );
+    /* ▶ */     TNutCage_M( profile2 );
     
     femalePanel(20,panelThickness,boltDiameter)
     
-    /* ▶ */     TNutCagePanelHole( profile2, allowance=2 );
+    /* ▶ */     TNutCage_F( profile2, allowance=2 );
     
     translate([0,panelThickness,0]) dummyBolt();
     translate([0,-nutEdgeGap,0]) dummyNut();
 }
 
 // *** MULTIPLE SLOTS ***
-translate([120,0,0]) {
+translate([130,0,0]) {
     malePanel(100)
     
-    /* ▶ */     TNutCages( 100, 3, profile2 );
+    /* ▶ */     TNutCage( 100, 3, profile2 );
     
     femalePanel(100,panelThickness,boltDiameter)
     
-    /* ▶ */     TNutCages( 100, -3, profile2 );
+    /* ▶ */     TNutCage( 100, -3, profile2 );
     
     patternRepeater(100,3) {
         translate([0,panelThickness,0]) dummyBolt();
@@ -179,7 +182,7 @@ module dummyNut() {
     color("green") translate([0,-nutThickness/2,2])
         square([nutDiameter,nutThickness],center=true);
 }
-```
+``` 
 
 ---
 ## Sample Code
@@ -225,18 +228,18 @@ nutThickness=kvGet(profile2,"nut.thickness");
 translate([0,0,0]) {
     panelMale()
     
-    /* ▶ */     TNutCage( profile1 );
+    /* ▶ */     TNutCage_M( profile1 );
     
     translate( [0,panelThickness/2,0] ) rotate( [90,0,0] ) panelFemale(panelThickness)
     
-    /* ▶ */     TNutCagePanelHole( profile1 );
+    /* ▶ */     TNutCage_F( profile1 );
 }
 
 // *** WITH BOLTS/NUTS ***
 // - see "nuts-bolts.scad"
 translate([50,0,0]) //rotate([0,0,180]) 
     {
-    rotate( [-90,0,0] ) color( "lightgray" ) {
+    rotate([-90,0,0]) color( "lightgray" ) {
         translate( [0,0,panelThickness] )
             Bolt(boltProfile);
         translate([0,0,-edgeGap-nutThickness]) rotate([0,0,30])
@@ -244,11 +247,11 @@ translate([50,0,0]) //rotate([0,0,180])
     }
     panelMale()
     
-    /* ▶ */     TNutCage( profile2 );
+    /* ▶ */     TNutCage_M( profile2 );
     
     translate([0,panelThickness/2,0]) rotate([90,0,0]) panelFemale(panelThickness)
     
-    /* ▶ */     TNutCagePanelHole( profile2 );
+    /* ▶ */     TNutCage_F( profile2 );
 }
 
 // *** ORIENTATION HELPERS ***
@@ -263,11 +266,11 @@ translate([100,0,0]) {
     }
     panelMale()
     
-    /* ▶ */     TNutCage( profile2, connectedPanelThickness=THK );
+    /* ▶ */     TNutCage_M( profile2, connectedPanelThickness=THK );
     
     OFront(THK) panelFemale(THK)
     
-    /* ▶ */     TNutCagePanelHole( profile2, allowance=2 );
+    /* ▶ */     TNutCage_F( profile2, allowance=2 );
 }
 
 module panelMale() {
@@ -336,19 +339,19 @@ rotate([0,0,180])
 showBolts=true;
 
 module assembly() {
-        CubeExtents(W,D,H);
+    CubeExtents(W,D,H);
 
     // shelves
-    color("LightGrey") OBottom(0,H/2-S1) solid()      shelfBottom();
-    color("LightGrey") OBottom(0,H/2-S2) solid()      shelfBottom();
-    if (showBolts)     OBottom(0,H/2-S1,faceIn=false) shelfBottomBolts();
-    if (showBolts)     OBottom(0,H/2-S2)              shelfBottomBolts();
+    color("LightGrey") OBottom (0,H/2-S1) solid() shelfBottom();
+    color("LightGrey") OBottom( 0,H/2-S2) solid() shelfBottom();
+    if (showBolts)     OFBottom(0,H/2-S1)         shelfBottomBolts();
+    if (showBolts)     OBottom (0,H/2-S2)         shelfBottomBolts();
     
     // walls
-                    OLeft (T,W/2) solid()                       walls();
-                    ORight(T,W/2) solid() rotate([0,180,0])     walls();
-    if (showBolts) OLeft (T,W/2)                               wallBolts();
-    if (showBolts) ORight(T,W/2, faceIn=false) mirror([0,0,1]) wallBolts();
+                   OLeft  (T,W/2) solid()                   walls();
+                   ORight (T,W/2) solid() rotate([0,180,0]) walls();
+    if (showBolts) OLeft  (T,W/2)                           wallBolts();
+    if (showBolts) OFRight(T,W/2) mirror([0,0,1])           wallBolts();
     
     // shelves front panel
     color("gray")  OFront(T,D/2,0,-H/2+SF1/2) solid() frontPanel1();
@@ -377,12 +380,12 @@ module walls() {
         MRight((-left+right)/2)
         square([effD,H],center=true);
         union() {                    
-            MUp(S1)    PBottom(H) TNutCages(D,-2,profile); // holes for shelf bottom
-            MUp(S2)    PBottom(H) TNutCages(D,-2,profile);
-            MLeft(T/2) PRight(D)  TNutCages(H,-3,profile); // back panel
+            MUp(S1)    PBottom(H) TNutCage(D,-2,profile); // holes for shelf bottom
+            MUp(S2)    PBottom(H) TNutCage(D,-2,profile);
+            MLeft(T/2) PRight(D)  TNutCage(H,-3,profile); // back panel
             // shelves front panel
-            MDown(H/2-S1/2) MLeft(left) PLeft(D) TNutCages(SF1,1,profile);
-            MUp  (H/2-S2/2) MLeft(left) PLeft(D) TNutCages(SF2,2,profile);
+            MDown(H/2-SF1/2) MLeft(left) PLeft(D) TNutCage(SF1,1,profile);
+            MUp  (H/2-SF2/2) MLeft(left) PLeft(D) TNutCage(SF2,2,profile);
         }
     }
 }
@@ -401,10 +404,10 @@ module back() {
     punch() {
         square([effW,H],center=true);
         union() {                    
-                    PLeft(effW)  TNutCages(H, 3,profile); // walls
-                    PRight(effW) TNutCages(H, 3,profile);
-            MUp(S1) PBottom(H)   TNutCages(W,-2,profile); // shelves bottom
-            MUp(S2) PBottom(H)   TNutCages(W,-2,profile);
+                    PLeft(effW)  TNutCage(H, 3,profile); // walls
+                    PRight(effW) TNutCage(H, 3,profile);
+            MUp(S1) PBottom(H)   TNutCage(W,-2,profile); // shelves bottom
+            MUp(S2) PBottom(H)   TNutCage(W,-2,profile);
         }
     }
 }
@@ -422,10 +425,10 @@ module shelfBottom() {
         MDown((-top+bottom)/2)
         square([effW,effD],center=true);
         union() {                    
-            MRight(T) PLeft(W)  TNutCages(D, 2,profile);  // walls
-            MLeft(T)  PRight(W) TNutCages(D, 2,profile);
-            MUp(bottom-T) PBottom(D) TNutCages(W,-2,profile); // front
-            MDown(-top) PTop(D) TNutCages(W, 2,profile);  // back
+            MRight(T)     PLeft(W)   TNutCage(D, 2,profile); // walls
+            MLeft(T)      PRight(W)  TNutCage(D, 2,profile);
+            MUp(bottom-T) PBottom(D) TNutCage(W,-2,profile); // front
+            MDown(-top)   PTop(D)    TNutCage(W, 2,profile); // back
         }
     }
 }
@@ -442,16 +445,16 @@ module frontPanel1() {
         MDown(-top/2)
         square([effW,effSF1],center=true);
         union() {
-            MRight(T/2) MUp(top/4)    PLeft(W)     TNutCages(SF1,-1,profile); // walls
-            MLeft (T/2) MUp(top/4)    PRight(W)    TNutCages(SF1,-1,profile);
-                        MDown(-top/2) PTop(effSF1) TNutCages(W  , 2,profile); // front
+            MRight(T/2)   PLeft(W)     TNutCage(SF1,-1,profile); // walls
+            MLeft (T/2)   PRight(W)    TNutCage(SF1,-1,profile);
+            MDown(-top/2) PTop(effSF1) TNutCage(W  , 2,profile); // front
         }
     }
 }
 module frontPanel1Bolts() {
     top   =-T;
-    MRight(T/2) MUp(top/4) PLeft( W) patternRepeater(SF1,1) boltNut();
-    MLeft (T/2) MUp(top/4) PLeft(-W) patternRepeater(SF1,1) boltNut();
+    MRight(T/2) PLeft( W) patternRepeater(SF1,1) boltNut();
+    MLeft (T/2) PLeft(-W) patternRepeater(SF1,1) boltNut();
 }
 module frontPanel2() {
     effW  =W+EXT*2;
@@ -461,16 +464,16 @@ module frontPanel2() {
         MUp(-bottom/2)
         square([effW,effSF2],center=true);
         union() {                    
-            MRight(T/2) MDown(bottom/4) PLeft(W)        TNutCages(SF2,-2,profile); // walls
-            MLeft (T/2) MDown(bottom/4) PRight(W)       TNutCages(SF2,-2,profile);
-                        MUp(-bottom/2)  PBottom(effSF2) TNutCages(W  , 2,profile); // front
+            MRight(T/2)    PLeft(W)        TNutCage(SF2,-2,profile); // walls
+            MLeft (T/2)    PRight(W)       TNutCage(SF2,-2,profile);
+            MUp(-bottom/2) PBottom(effSF2) TNutCage(W  , 2,profile); // front
         }
     }
 }
 module frontPanel2Bolts() {
     bottom=-T;
-    MRight(T/2) MDown(bottom/4) PLeft( W) patternRepeater(SF2,2) boltNut();
-    MLeft (T/2) MDown(bottom/4) PLeft(-W) patternRepeater(SF2,2) boltNut();
+    MRight(T/2) PLeft( W) patternRepeater(SF2,2) boltNut();
+    MLeft (T/2) PLeft(-W) patternRepeater(SF2,2) boltNut();
 }       
 
 // to diagnose a part while designing,

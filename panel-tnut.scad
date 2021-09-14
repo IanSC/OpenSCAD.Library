@@ -1,11 +1,11 @@
 //
-// PANEL-NOTCHES
+// PANEL-TNUT
 // by ISC 2021
 //
-//     TNutCageProfile( ... )                   - create profile
-//     TNutCage( profile )                      - draw 2D bolt/nut capture slots
-//     TNutCagePanelHole( profile )             - draw 2D hole for perpendicular panel
-//     TNutCages( targetWidth, count, profile ) - repeated bolt/nut capture slots
+//     TNutCageProfile( ... )                                                           - create profile
+//     TNutCage_M( profile, connectedPanelThickness )                                   - draw 2D bolt/nut capture slots
+//     TNutCage_F( profile, allowance )                                                 - draw 2D hole for perpendicular panel
+//     TNutCages( targetWidth, count, profile, connectedPanelThickness, holeAllowance ) - repeated bolt/nut capture slots
 //
 
 include <KVTree.scad>
@@ -54,11 +54,11 @@ include <KVTree.scad>
         translate([0,0,0]) {
             malePanel(20)
             
-            /* ▶ */     TNutCage( profile1 );
+            /* ▶ */     TNutCage_M( profile1 );
             
             femalePanel(20,panelThickness,boltDiameter)
             
-            /* ▶ */     TNutCagePanelHole( profile1 );
+            /* ▶ */     TNutCage_F( profile1 );
             
             translate([0,panelThickness,0]) dummyBolt();
             translate([0,-nutEdgeGap,0]) dummyNut();
@@ -69,11 +69,11 @@ include <KVTree.scad>
             THK=5;
             malePanel(20)
 
-            /* ▶ */     TNutCage( profile1, connectedPanelThickness=THK );
+            /* ▶ */     TNutCage_M( profile1, connectedPanelThickness=THK );
             
             femalePanel(20,THK,boltDiameter)
             
-            /* ▶ */     TNutCagePanelHole( profile1 );
+            /* ▶ */     TNutCage_F( profile1 );
             
             translate([0,THK,0]) dummyBolt();
             translate([0,-nutEdgeGap,0]) dummyNut();
@@ -83,11 +83,11 @@ include <KVTree.scad>
             translate([60,0,0]) {
             malePanel(20)
             
-            /* ▶ */     TNutCage( profile2 );
+            /* ▶ */     TNutCage_M( profile2 );
             
             femalePanel(20,panelThickness,boltDiameter)
             
-            /* ▶ */     TNutCagePanelHole( profile2, allowance=2 );
+            /* ▶ */     TNutCage_F( profile2, allowance=2 );
             
             translate([0,panelThickness,0]) dummyBolt();
             translate([0,-nutEdgeGap,0]) dummyNut();
@@ -97,11 +97,11 @@ include <KVTree.scad>
         translate([130,0,0]) {
             malePanel(100)
             
-            /* ▶ */     TNutCages( 100, 3, profile2 );
+            /* ▶ */     TNutCage( 100, 3, profile2 );
             
             femalePanel(100,panelThickness,boltDiameter)
             
-            /* ▶ */     TNutCages( 100, -3, profile2 );
+            /* ▶ */     TNutCage( 100, -3, profile2 );
             
             patternRepeater(100,3) {
                 translate([0,panelThickness,0]) dummyBolt();
@@ -184,18 +184,18 @@ include <KVTree.scad>
         translate([0,0,0]) {
             panelMale()
             
-            /* ▶ */     TNutCage( profile1 );
+            /* ▶ */     TNutCage_M( profile1 );
             
             translate( [0,panelThickness/2,0] ) rotate( [90,0,0] ) panelFemale(panelThickness)
             
-            /* ▶ */     TNutCagePanelHole( profile1 );
+            /* ▶ */     TNutCage_F( profile1 );
         }
         
         // *** WITH BOLTS/NUTS ***
         // - see "nuts-bolts.scad"
         translate([50,0,0]) //rotate([0,0,180]) 
             {
-            rotate( [-90,0,0] ) color( "lightgray" ) {
+            rotate([-90,0,0]) color( "lightgray" ) {
                 translate( [0,0,panelThickness] )
                     Bolt(boltProfile);
                 translate([0,0,-edgeGap-nutThickness]) rotate([0,0,30])
@@ -203,18 +203,18 @@ include <KVTree.scad>
             }
             panelMale()
             
-            /* ▶ */     TNutCage( profile2 );
+            /* ▶ */     TNutCage_M( profile2 );
             
             translate([0,panelThickness/2,0]) rotate([90,0,0]) panelFemale(panelThickness)
             
-            /* ▶ */     TNutCagePanelHole( profile2 );
+            /* ▶ */     TNutCage_F( profile2 );
         }
         
         // *** ORIENTATION HELPERS ***
         // - see "orientation.scad"
         translate([100,0,0]) {
             THK=8;
-            OFront(THK,faceIn=true) color( "lightgray" ) {
+            OFFront(THK) color( "lightgray" ) {
                 OBottom(THK)
                     Bolt(boltProfile);
                 OBottom(THK,edgeGap+THK+nutThickness) rotate([0,0,30])
@@ -222,11 +222,11 @@ include <KVTree.scad>
             }
             panelMale()
             
-            /* ▶ */     TNutCage( profile2, connectedPanelThickness=THK );
+            /* ▶ */     TNutCage_M( profile2, connectedPanelThickness=THK );
             
             OFront(THK) panelFemale(THK)
             
-            /* ▶ */     TNutCagePanelHole( profile2, allowance=2 );
+            /* ▶ */     TNutCage_F( profile2, allowance=2 );
         }
         
         module panelMale() {
@@ -297,19 +297,19 @@ include <KVTree.scad>
         showBolts=true;
         
         module assembly() {
-             CubeExtents(W,D,H);
+            CubeExtents(W,D,H);
 
             // shelves
-            color("LightGrey") OBottom(0,H/2-S1) solid()      shelfBottom();
-            color("LightGrey") OBottom(0,H/2-S2) solid()      shelfBottom();
-            if (showBolts)     OBottom(0,H/2-S1,faceIn=false) shelfBottomBolts();
-            if (showBolts)     OBottom(0,H/2-S2)              shelfBottomBolts();
+            color("LightGrey") OBottom (0,H/2-S1) solid() shelfBottom();
+            color("LightGrey") OBottom( 0,H/2-S2) solid() shelfBottom();
+            if (showBolts)     OFBottom(0,H/2-S1)         shelfBottomBolts();
+            if (showBolts)     OBottom (0,H/2-S2)         shelfBottomBolts();
             
             // walls
-                           OLeft (T,W/2) solid()                       walls();
-                           ORight(T,W/2) solid() rotate([0,180,0])     walls();
-            if (showBolts) OLeft (T,W/2)                               wallBolts();
-            if (showBolts) ORight(T,W/2, faceIn=false) mirror([0,0,1]) wallBolts();
+                           OLeft  (T,W/2) solid()                   walls();
+                           ORight (T,W/2) solid() rotate([0,180,0]) walls();
+            if (showBolts) OLeft  (T,W/2)                           wallBolts();
+            if (showBolts) OFRight(T,W/2) mirror([0,0,1])           wallBolts();
             
             // shelves front panel
             color("gray")  OFront(T,D/2,0,-H/2+SF1/2) solid() frontPanel1();
@@ -338,12 +338,12 @@ include <KVTree.scad>
                 MRight((-left+right)/2)
                 square([effD,H],center=true);
                 union() {                    
-                    MUp(S1)    PBottom(H) TNutCages(D,-2,profile); // holes for shelf bottom
-                    MUp(S2)    PBottom(H) TNutCages(D,-2,profile);
-                    MLeft(T/2) PRight(D)  TNutCages(H,-3,profile); // back panel
+                    MUp(S1)    PBottom(H) TNutCage(D,-2,profile); // holes for shelf bottom
+                    MUp(S2)    PBottom(H) TNutCage(D,-2,profile);
+                    MLeft(T/2) PRight(D)  TNutCage(H,-3,profile); // back panel
                     // shelves front panel
-                    MDown(H/2-S1/2) MLeft(left) PLeft(D) TNutCages(SF1,1,profile);
-                    MUp  (H/2-S2/2) MLeft(left) PLeft(D) TNutCages(SF2,2,profile);
+                    MDown(H/2-SF1/2) MLeft(left) PLeft(D) TNutCage(SF1,1,profile);
+                    MUp  (H/2-SF2/2) MLeft(left) PLeft(D) TNutCage(SF2,2,profile);
                 }
             }
         }
@@ -362,10 +362,10 @@ include <KVTree.scad>
             punch() {
                 square([effW,H],center=true);
                 union() {                    
-                            PLeft(effW)  TNutCages(H, 3,profile); // walls
-                            PRight(effW) TNutCages(H, 3,profile);
-                    MUp(S1) PBottom(H)   TNutCages(W,-2,profile); // shelves bottom
-                    MUp(S2) PBottom(H)   TNutCages(W,-2,profile);
+                            PLeft(effW)  TNutCage(H, 3,profile); // walls
+                            PRight(effW) TNutCage(H, 3,profile);
+                    MUp(S1) PBottom(H)   TNutCage(W,-2,profile); // shelves bottom
+                    MUp(S2) PBottom(H)   TNutCage(W,-2,profile);
                 }
             }
         }
@@ -383,10 +383,10 @@ include <KVTree.scad>
                 MDown((-top+bottom)/2)
                 square([effW,effD],center=true);
                 union() {                    
-                    MRight(T) PLeft(W)  TNutCages(D, 2,profile);  // walls
-                    MLeft(T)  PRight(W) TNutCages(D, 2,profile);
-                    MUp(bottom-T) PBottom(D) TNutCages(W,-2,profile); // front
-                    MDown(-top) PTop(D) TNutCages(W, 2,profile);  // back
+                    MRight(T)     PLeft(W)   TNutCage(D, 2,profile); // walls
+                    MLeft(T)      PRight(W)  TNutCage(D, 2,profile);
+                    MUp(bottom-T) PBottom(D) TNutCage(W,-2,profile); // front
+                    MDown(-top)   PTop(D)    TNutCage(W, 2,profile); // back
                 }
             }
         }
@@ -403,16 +403,16 @@ include <KVTree.scad>
                 MDown(-top/2)
                 square([effW,effSF1],center=true);
                 union() {
-                    MRight(T/2) MUp(top/4)    PLeft(W)     TNutCages(SF1,-1,profile); // walls
-                    MLeft (T/2) MUp(top/4)    PRight(W)    TNutCages(SF1,-1,profile);
-                                MDown(-top/2) PTop(effSF1) TNutCages(W  , 2,profile); // front
+                    MRight(T/2)   PLeft(W)     TNutCage(SF1,-1,profile); // walls
+                    MLeft (T/2)   PRight(W)    TNutCage(SF1,-1,profile);
+                    MDown(-top/2) PTop(effSF1) TNutCage(W  , 2,profile); // front
                 }
             }
         }
         module frontPanel1Bolts() {
             top   =-T;
-            MRight(T/2) MUp(top/4) PLeft( W) patternRepeater(SF1,1) boltNut();
-            MLeft (T/2) MUp(top/4) PLeft(-W) patternRepeater(SF1,1) boltNut();
+            MRight(T/2) PLeft( W) patternRepeater(SF1,1) boltNut();
+            MLeft (T/2) PLeft(-W) patternRepeater(SF1,1) boltNut();
         }
         module frontPanel2() {
             effW  =W+EXT*2;
@@ -422,16 +422,16 @@ include <KVTree.scad>
                 MUp(-bottom/2)
                 square([effW,effSF2],center=true);
                 union() {                    
-                    MRight(T/2) MDown(bottom/4) PLeft(W)        TNutCages(SF2,-2,profile); // walls
-                    MLeft (T/2) MDown(bottom/4) PRight(W)       TNutCages(SF2,-2,profile);
-                                MUp(-bottom/2)  PBottom(effSF2) TNutCages(W  , 2,profile); // front
+                    MRight(T/2)    PLeft(W)        TNutCage(SF2,-2,profile); // walls
+                    MLeft (T/2)    PRight(W)       TNutCage(SF2,-2,profile);
+                    MUp(-bottom/2) PBottom(effSF2) TNutCage(W  , 2,profile); // front
                 }
             }
         }
         module frontPanel2Bolts() {
             bottom=-T;
-            MRight(T/2) MDown(bottom/4) PLeft( W) patternRepeater(SF2,2) boltNut();
-            MLeft (T/2) MDown(bottom/4) PLeft(-W) patternRepeater(SF2,2) boltNut();
+            MRight(T/2) PLeft( W) patternRepeater(SF2,2) boltNut();
+            MLeft (T/2) PLeft(-W) patternRepeater(SF2,2) boltNut();
         }       
         
         // to diagnose a part while designing,
@@ -493,10 +493,10 @@ include <KVTree.scad>
         nutEdgeGap,              // distance from panel edge to nut capture slot
         boltProfile,             // specify instead of boltLength, boltDiameter
         nutProfile,              // specify instead of boltDiameter, nutDiameter, nutThickness
-        boltDiameterAllowance=0,
-        boltLengthAllowance=0,
-        nutDiameterAllowance =0,
-        nutThicknessAllowance=0
+        boltDiameterAllowance = 0,
+        boltLengthAllowance   = 0,
+        nutDiameterAllowance  = 0,
+        nutThicknessAllowance = 0
     ) = let(
         eBoltLength   = SELECT( boltLength,   kvSearchLax( boltProfile, "length"      ) ),
         eBoltDiameter = SELECT( boltDiameter, kvSearchLax( boltProfile, "diameter"    ), kvSearchLax( nutProfile, "boltDiameter" ) ),
@@ -516,16 +516,18 @@ include <KVTree.scad>
             "edgeGap", nutEdgeGap ])
     ]);
 
-    module TNutCages(targetWidth,count,profile,connectedPanelThickness,holeAllowance=0) {
+    module TNutCage(targetWidth,count,profile,connectedPanelThickness,holeAllowance=0) {
+        // connectedPanelThickness - for TNutCage()
+        // holeAllowance           - for TNutCagePanelHole()
         if (count>0)
             patternRepeater(targetWidth,count)
-                TNutCage(profile,connectedPanelThickness);
+                TNutCage_M(profile,connectedPanelThickness);
         else
             patternRepeater(targetWidth,-count)
-                TNutCagePanelHole(profile,holeAllowance);
+                TNutCage_F(profile,holeAllowance);
     }
 
-    module TNutCage(profile,connectedPanelThickness) {
+    module TNutCage_M(profile,connectedPanelThickness) {
         overlap=1; // extra on top for clean punch
 
         ePanelThickness=SELECT(connectedPanelThickness,kvGet(profile,"connectedPanelThickness"));
@@ -546,7 +548,7 @@ include <KVTree.scad>
             square( [nutDiameter,nutThickness+nTa], center=true );
     }  
 
-    module TNutCagePanelHole(profile,allowance=0) {
+    module TNutCage_F(profile,allowance=0) {
         boltDiameter=kvGet(profile,"bolt.effDiameter");
         circle( d=boltDiameter+allowance );
     }

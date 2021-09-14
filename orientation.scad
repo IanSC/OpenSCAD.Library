@@ -4,6 +4,9 @@
 //
 // routines to easily position panels
 //
+//     OTop(),  OBottom(),  OFront(),  OBack(),  OLeft(),  ORight()
+//     OFTop(), OFBottom(), OFFront(), OFBack(), OFLeft(), OFRight()
+//
 
 include <utility.scad>
 
@@ -12,9 +15,9 @@ include <utility.scad>
 //
 
     // run me!!!
-    //Orientation_Demo_Basic();
-    //translate( [0,100,0] )
-    //    Orientation_Demo();
+    //Orientation_Demo();
+    //translate([-100,0,0])
+    //    Orientation_Demo_Basic();
     
     module Orientation_Demo_Basic() {
         // shows default positioning of panels
@@ -24,38 +27,51 @@ include <utility.scad>
         H   = 50; // height
         THK = 3;  // thickness of panel
         
-        OTop   (THK) color( "green"  ) cube([ W,D  ,THK ],center=true);
-        OBottom(THK) color( "red"    ) cube([ W,D  ,THK ],center=true);
-        OFront (THK) color( "blue"   ) cube([ W,  H,THK ],center=true);
-        OBack  (THK) color( "yellow" ) cube([ W,  H,THK ],center=true);
-        OLeft  (THK) color( "purple" ) cube([   D,H,THK ],center=true);
-        ORight (THK) color( "tomato" ) cube([   D,H,THK ],center=true);
+        OTop   (THK) color( "orange"    ) cube([ W,D  ,THK ],center=true);
+        OBottom(THK) color( "gold"      ) cube([ W,D  ,THK ],center=true);
+        OFront (THK) color( "steelblue" ) cube([ W,  H,THK ],center=true);
+        OBack  (THK) color( "red"       ) cube([ W,  H,THK ],center=true);
+        OLeft  (THK) color( "green"     ) cube([   D,H,THK ],center=true);
+        ORight (THK) color( "violet"    ) cube([   D,H,THK ],center=true);
     }
 
     module Orientation_Demo() {
         
         $fn=20;
         
+        // NATURAL POSITIONING
         axis();
         Panel(50,50);
-        color("SteelBlue") OFront (THK,50) Panel(50,50);
+        color("steelblue") OFront (THK,50) Panel(50,50);
         color("red")       OBack  (THK,50) Panel(50,50);
         color("green")     OLeft  (THK,50) Panel(50,50);
         color("violet")    ORight (THK,50) Panel(50,50);
         color("orange")    OTop   (THK,50) Panel(50,50);
-        color("Gold")      OBottom(THK,50) Panel(50,50);
+        color("gold")      OBottom(THK,50) Panel(50,50);
+
+        // FLIP OF NATURAL
+        translate( [100,100,0] ) {
+            axis();
+            Panel(50,50);
+            color("steelblue") OFFront (THK,50) Panel(50,50);
+            color("red")       OFBack  (THK,50) Panel(50,50);
+            color("green")     OFLeft  (THK,50) Panel(50,50);
+            color("violet")    OFRight (THK,50) Panel(50,50);
+            color("orange")    OFTop   (THK,50) Panel(50,50);
+            color("gold")      OFBottom(THK,50) Panel(50,50);
+        }
 
         W   = 40; // width
         D   = 50; // depth
         H   = 80; // height
         THK =  3; // thickness of panel
-                
+
         // panels facing outwards
-        translate( [110,0,0] )
+        translate( [210,0,0] )
             Box( faceIn=false );
         
         // panels facing inwards
-        translate( [200,0,0] )
+        translate( [300,0,0] )
             Box( faceIn=true );
 
         module axis() {
@@ -68,12 +84,12 @@ include <utility.scad>
 
         module Box( faceIn ) {
             // less: THK*2, so no overlap
-            OBottom(THK, H/2, faceIn=faceIn) color("Gold"     ) Panel( W,D               );
+            OBottom(THK, H/2, faceIn=faceIn) color("gold"     ) Panel( W,D               );
             OLeft  (THK, W/2, faceIn=faceIn) color("green"    ) Panel(   D-THK*2,H-THK*2 );
             OBack  (THK, D/2, faceIn=faceIn) color("red"      ) Panel( W,        H-THK*2 );
             OTop   (THK, H/2, faceIn=faceIn) color("orange"   ) Panel( W,D               );
             ORight (THK, W/2, faceIn=faceIn) color("violet"   ) Panel(   D-THK*2,H-THK*2 );
-            OFront (THK, D/2, faceIn=faceIn) color("SteelBlue") Panel( W,        H-THK*2 );
+            OFront (THK, D/2, faceIn=faceIn) color("steelblue") Panel( W,        H-THK*2 );
             CubeExtents( W,D,H, color="red" );
         }
 
@@ -91,18 +107,7 @@ include <utility.scad>
                 }
             }
         }
-        
-        module BoxDefault() {
-            // less: THK*2, so no overlap
-            OTop   (THK, H/2 ) color("green" ,0.5) Panel( W,D               ); // move up only
-            OBottom(THK, H/2 ) color("red"   ,0.5) Panel( W,D               ); // move down only
-            OFront (THK, D/2 ) color("blue"  ,0.5) Panel( W,        H-THK*2 ); // facing front
-            OBack  (THK, D/2 ) color("yellow",0.5) Panel( W,        H-THK*2 ); // facing front
-            OLeft  (THK, W/2 ) color("purple",0.6) Panel(   D-THK*2,H-THK*2 ); // facing right
-            ORight (THK, W/2 ) color("tomato",0.7) Panel(   D-THK*2,H-THK*2 ); // facing left
-            CubeExtents( W,D,H, color="red" );
-        }
-        
+ 
     }
 
 //
@@ -130,6 +135,10 @@ include <utility.scad>
         else
             children();
     }
+
+    module OFTop( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=true ) {
+        OTop( thickness, offset, leftRight, frontBack, faceIn ) children();
+    }
     
     module OBottom( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=true ) {
         // panel drawn on X/Y axis centered at 0
@@ -145,6 +154,9 @@ include <utility.scad>
             rotate( [0,180,0] ) children();
     }
 
+    module OFBottom( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=false ) {
+        OBottom( thickness, offset, leftRight, frontBack, faceIn ) children();
+    }
 
     module OFront( thickness=0, offset=0, leftRight=0, upDown=0, faceIn=false ) {
         // panel drawn on X/Y axis centered at 0
@@ -159,6 +171,10 @@ include <utility.scad>
             rotate( [0,180,0] ) children();
         else
             children();
+    }
+
+    module OFFront( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=true ) {
+        OFront( thickness, offset, leftRight, frontBack, faceIn ) children();
     }
 
     module OBack( thickness=0, offset=0, leftRight=0, upDown=0, faceIn=true ) {
@@ -176,6 +192,10 @@ include <utility.scad>
             rotate( [0,180,0] ) children();
     }
 
+    module OFBack( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=false ) {
+        OBack( thickness, offset, leftRight, frontBack, faceIn ) children();
+    }
+
     module OLeft( thickness=0, offset=0, frontBack=0, upDown=0, faceIn=true ) {
         // drawn X/Y axis centered by user
         // when positioned, put on the left as if viewing left wall
@@ -191,6 +211,10 @@ include <utility.scad>
             rotate( [0,180,0] ) children();
     }
 
+    module OFLeft( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=false ) {
+        OLeft( thickness, offset, leftRight, frontBack, faceIn ) children();
+    }
+
     module ORight( thickness=0, offset=0, frontBack=0, upDown=0, faceIn=true ) {
         // panel drawn on X/Y axis centered at 0
         // when positioned, put on the right as if viewing right wall
@@ -204,4 +228,8 @@ include <utility.scad>
             children();
         else
             rotate( [0,180,0] ) children();
+    }
+
+    module OFRight( thickness=0, offset=0, leftRight=0, frontBack=0, faceIn=false ) {
+        ORight( thickness, offset, leftRight, frontBack, faceIn ) children();
     }

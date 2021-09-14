@@ -1,11 +1,12 @@
 # Panel Notch
+Create interlocking notches on panels.
 
 ---
 ## List of Functions
 <table>
 <tr><td><b>NotchProfile</b>( ... )</td><td>create profile</td></tr>
-<tr><td><b>Notch</b>( targetWidth, notches, profile )</td><td>generate 2D notch/holes for panel</td></tr>
-<tr><td><b>NotchEdge</b>( targetWidth, notches, profile )</td><td>generate 2D notch/holes on panel edge</td></tr>
+<tr><td><b>Notch</b>( targetWidth, notches, profile )</td><td>generate 2D notches/holes for panel</td></tr>
+<tr><td><b>NotchEdge</b>( targetWidth, notches, profile )</td><td>generate 2D notches/holes on panel edge</td></tr>
 </table>
 
 ---
@@ -29,11 +30,13 @@
 #### _Notch( targetWidth, notches, profile )_
 <table>
 <tr><td>targetWidth     <td>&#10004;<td>length to put notches/holes on
-<tr><td>notches         <td>&#10004;<td>number of notches/holes to generate
+<tr><td>notches         <td>&#10004;<td>number of notches/holes to generate<br/>
+                                        (+) number of notches<br/>
+                                        (-) number of holes
 <tr><td>profile         <td>&#10004;<td>notch profile to use
 <tr><td>punchGap = true <td>        <td>whether to punch out left/right gaps if specified
-<tr><td>leftGap = 0     <td>        <td>margin on the left before notching
-<tr><td>rightGap = 0    <td>        <td>margin on the right before notching
+<tr><td>leftGap = 0     <td>        <td>additional margin on the left before notching
+<tr><td>rightGap = 0    <td>        <td>additional margin on the right before notching
 <tr><td>additive = false<td>        <td>generate additive notches or subtractive
 <!--<tr><td>fromEdge = false<td>        <td>whether to put notches edge to edge instead of centered-->
 </table>
@@ -43,11 +46,13 @@
 #### _NotchEdge( targetWidth, notches, profile )_
 <table>
 <tr><td>targetWidth     <td>&#10004;<td>length to put notches/holes on
-<tr><td>notches         <td>&#10004;<td>number of notches/holes to generate
+<tr><td>notches         <td>&#10004;<td>number of notches/holes to generate<br/>
+                                        (+) number of notches<br/>
+                                        (-) number of holes
 <tr><td>profile         <td>&#10004;<td>notch profile to use
 <tr><td>punchGap = true <td>        <td>whether to punch out left/right gaps if specified
-<tr><td>leftGap = 0     <td>        <td>margin on the left before notching
-<tr><td>rightGap = 0    <td>        <td>margin on the right before notching
+<tr><td>leftGap = 0     <td>        <td>additional margin on the left before notching
+<tr><td>rightGap = 0    <td>        <td>additional margin on the right before notching
 <tr><td>additive = false<td>        <td>generate additive notches or subtractive
 <!--<tr><td>notEdge = false <td>        <td>whether to put notches centered instead of edge to edge-->
 </table>
