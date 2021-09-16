@@ -24,13 +24,28 @@ $fn=50;
 //linear_extrude(height = 5, center = true, convexity = 10)
 //		import(file = "/Users/ianco/Documents/OpenSCAD/sheet-folding.dxf", layer = "0");
 
-    translate([200,0,0])
-        Test1();
+    Test0();
+    //translate([200,0,0])
+    //    Test1();
     //Test2();
-    //Test3();
-    //Test4();
-    sheetCore_v2( [100,200,20,30,10,50] );
-
+    // Test3();
+    // Test4();
+    //sheetCore_v2( [100,200,20,30,10,50] );
+    
+    module Test0() {
+        topPanel    = P( 80, 30, c=4, up=F( o=-3, p=P(70,40,c=4) ) );
+        bottomPanel = P( 70, 30-3,c=8, dn=F( o=3, p=P(70,40,c=15) ) );
+        mainPanel = P( 80, 50, c=4,
+            up=F( p=topPanel ),
+            dn=F( p=bottomPanel, o=5 )
+            //,rt=F( p=bottomPanel, o=5 )
+            //,lf=F( p=bottomPanel, o=-5 )
+        );
+        flatSheet(mainPanel);
+        translate([0,0,50])
+            model(mainPanel,3);
+    }
+    
     module Test1() {
         a = P(
             w=100, h=30,
@@ -48,8 +63,8 @@ $fn=50;
         c = P(30,30,ct=4);
 
         translate([0,0,50])
-            model(a);
-        sheet(a);
+            model(a,3);
+        flatSheet(a);
   
         translate([0,-100,0])
             sheetCore(c);
@@ -62,9 +77,9 @@ $fn=50;
             up=F( p=topPanel ),        // put topPanel on top of mainPanel
             dn=F( p=bottomPanel, o=5 ) // put bottomPanel below mainPanel, offset to the right
         );
-        sheet(mainPanel);
+        flatSheet(mainPanel);
         translate([0,0,50])
-            model(mainPanel);
+            model(mainPanel,3);
     }
 
     module Test3() {
@@ -75,9 +90,9 @@ $fn=50;
         mainPanel = P( 50, 50,
             lf=F( p=leftPanel2, a=45 ) // put on left again of another panel
         );
-        sheet(mainPanel);
+        flatSheet(mainPanel);
         translate([0,0,50])
-            model(mainPanel);
+            model(mainPanel,3);
     }
     
     module Test4() {
@@ -94,8 +109,8 @@ $fn=50;
         // got echo(a) from console
         b=[100, 30, 5, 0, 0, 0, [90, 10, [60, 30, 0, 0, 0, 0, [45, 0, [50, 20, 0, 0, 0, 0, undef, undef, undef, undef]], undef, undef, undef]], [90, 0, [100, 30, 0, 0, 0, 0, undef, [45, 0, [20, 20, 0, 0, 0, 0, undef, undef, undef, undef]], undef, undef]], [90, 0, [50, 30, 0, 0, 0, 0, undef, undef, [-45, 0, [20, 20, 0, 0, 0, 0, undef, undef, undef, undef]], undef]], [90, 5, [50, 20, 0, 0, 0, 0, undef, undef, undef, [45, 0, [20, 20, 0, 0, 0, 0, undef, undef, undef, undef]]]]];
         translate([0,0,50])
-            model(b);
-        sheet(b);
+            model(b,3);
+        flatSheet(b);
     }
 
 //
@@ -131,41 +146,48 @@ $fn=50;
 // 3D MODEL
 //
 
-    module model( panel ) {
-        if ( panel==undef ) echo( "***** MISSING PARAMETER *****" );
-        else {
-            w=panel[0]; h=panel[1];
-            ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
-            up=panel[6]; dn=panel[7]; lf=panel[8]; rt=panel[9];
-            sheetCore(panel);
-            if ( up != undef ) {
-                a=up[0]; o=up[1]; r2=up[2];
-                translate([0,h/2,0])
-                rotate([a,0,0])
-                translate([o,r2[1]/2,0])
-                model( r2 );
-            }
-            if ( dn != undef ) {
-                a=dn[0]; o=dn[1]; r2=dn[2];
-                translate([0,-h/2,0])
-                rotate([-a,0,0])
-                translate([o,-r2[1]/2,0])
-                model( r2 );
-            }
-            if ( lf != undef ) {
-                a=lf[0]; o=lf[1]; r2=lf[2];
-                translate([-w/2,0,0])
-                rotate([0,a,0])
-                translate([-r2[0]/2,o,0])
-                model( r2 );
-            }
-            if ( rt != undef ) {
-                a=rt[0]; o=rt[1]; r2=rt[2];
-                translate([w/2,0,0])
-                rotate([0,-a,0])
-                translate([r2[0]/2,o,0])
-                model( r2 );
-            }
+    module model(panel,thickness=3) {
+        has=panel!=undef;
+        assert(has,"model(): missing parameter");
+        
+        w=panel[0]; h=panel[1];
+        //ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
+        up=panel[6]; dn=panel[7]; lf=panel[8]; rt=panel[9];
+        //c=rands(0.4,0.8,1)[0];
+        //color([c,c,c])
+        c=rands(0.4,0.8,3);
+        color(c)            
+        linear_extrude(thickness,center=true)
+            panelCore(panel);
+        if ( up != undef ) {
+            a=up[0]; o=up[1]; r2=up[2];
+            //color("red")
+            translate([0,h/2,0])
+            rotate([a,0,0])
+            translate([o,r2[1]/2,0])
+            model(r2,thickness);
+        }
+        if ( dn != undef ) {
+            a=dn[0]; o=dn[1]; r2=dn[2];
+            //color("green")
+            translate([0,-h/2,0])
+            rotate([-a,0,0])
+            translate([o,-r2[1]/2,0])
+            model(r2,thickness);
+        }
+        if ( lf != undef ) {
+            a=lf[0]; o=lf[1]; r2=lf[2];
+            translate([-w/2,0,0])
+            rotate([0,a,0])
+            translate([-r2[0]/2,o,0])
+            model(r2,thickness);
+        }
+        if ( rt != undef ) {
+            a=rt[0]; o=rt[1]; r2=rt[2];
+            translate([w/2,0,0])
+            rotate([0,-a,0])
+            translate([r2[0]/2,o,0])
+            model(r2,thickness);
         }
     }
 
@@ -173,142 +195,142 @@ $fn=50;
 // FLAT SHEET
 //
 
-    module sheet( panel ) {
-        if ( panel==undef ) echo( "***** MISSING PARAMETER *****" );
-        else {
-            w=panel[0]; h=panel[1];
-            ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
-            up=panel[6]; dn=panel[7]; lf=panel[8]; rt=panel[9];
-            difference() {
-                //color( "yellow", 0.5 )
-                union() {
-                    sheetCore( panel );
-                    if ( up != undef ) {
-                        a=up[0]; o=up[1]; r2=up[2]; r2h=r2[1];
-                        translate([0,h/2,0])
-                        translate([o,r2h/2,0])
-                        sheet( r2 );
-                    }
-                    if ( dn != undef ) {
-                        a=dn[0]; o=dn[1]; r2=dn[2]; r2h=r2[1];
-                        translate([0,-h/2,0])
-                        translate([o,-r2h/2,0])
-                        sheet( r2 );
-                    }
-                    if ( lf != undef ) {
-                        a=lf[0]; o=lf[1]; r2=lf[2]; r2w=r2[0];
-                        translate([-w/2,0,0])
-                        translate([-r2w/2,o,0])
-                        sheet( r2 );
-                    }
-                    if ( rt != undef ) {
-                        a=rt[0]; o=rt[1]; r2=rt[2]; r2w=r2[0];
-                        translate([w/2,0,0])
-                        translate([r2w/2,o,0])
-                        sheet( r2 );
-                    }
+    module flatSheet( panel ) {
+        has=panel!=undef;
+        assert(has,"flatSheet(): missing parameter");
+        
+        w=panel[0]; h=panel[1];
+        ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
+        up=panel[6]; dn=panel[7]; lf=panel[8]; rt=panel[9];
+        difference() {
+            //color( "yellow", 0.5 )
+            union() {
+                panelCore( panel );
+                if (up!=undef) {
+                    a=up[0]; o=up[1]; sp=up[2]; sph=sp[1];
+                    translate([0,h/2,0])
+                    translate([o,sph/2,0])
+                    flatSheet(sp);
                 }
-                //color( "red", 0.5 )
-                union() {
-                    if ( up != undef ) {
-                        a=up[0]; o=up[1]; r2=up[2]; r2w=r2[0];
-                        translate([-effLeft(w,r2w,o),h/2,0]) fm("r");
-                        translate([effRight(w,r2w,o),h/2,0]) fm("l");
-                    }
-                    if ( dn != undef ) {
-                        a=dn[0]; o=dn[1]; r2=dn[2]; r2w=r2[0];
-                        translate([-effLeft(w,r2w,o),-h/2,0]) fm("r");
-                        translate([effRight(w,r2w,o),-h/2,0]) fm("l");
-                    }
-                    if ( lf != undef ) {
-                        a=lf[0]; o=lf[1]; r2=lf[2]; r2h=r2[1];
-                        translate([-w/2,effTop(h,r2h,o),0]) fm("b");
-                        translate([-w/2,-effBottom(h,r2h,o),0]) fm("u");
-                    }
-                    if ( rt != undef ) {
-                        a=rt[0]; o=rt[1]; r2=rt[2]; r2h=r2[1];
-                        translate([w/2,effTop(h,r2h,o),0]) fm("b");
-                        translate([w/2,-effBottom(h,r2h,o),0]) fm("u");
-                    }
+                if (dn!=undef) {
+                    a=dn[0]; o=dn[1]; sp=dn[2]; sph=sp[1];
+                    translate([0,-h/2,0])
+                    translate([o,-sph/2,0])
+                    flatSheet(sp);
+                }
+                if (lf!=undef) {
+                    a=lf[0]; o=lf[1]; sp=lf[2]; spw=sp[0];
+                    translate([-w/2,0,0])
+                    translate([-spw/2,o,0])
+                    flatSheet(sp);
+                }
+                if (rt!=undef) {
+                    a=rt[0]; o=rt[1]; sp=rt[2]; spw=sp[0];
+                    translate([w/2,0,0])
+                    translate([spw/2,o,0])
+                    flatSheet(sp);
+                }
+            }
+            //color( "red", 0.5 )
+            union() {
+                if (up!=undef) {
+                    a=up[0]; o=up[1]; sp=up[2]; spw=sp[0]; spbl=sp[4]; spbr=sp[5];
+                    translate([-effLeft(w-ctl*2,spw-spbl*2,o),h/2,0]) fm("r");
+                    translate([effRight(w-ctr*2,spw-spbr*2,o),h/2,0]) fm("l");
+                }
+                if (dn!=undef) {
+                    a=dn[0]; o=dn[1]; sp=dn[2]; spw=sp[0]; sptl=sp[2]; sptr=sp[3];
+                    translate([-effLeft(w-cbl*2,spw-sptl*2,o),-h/2,0]) fm("r");
+                    translate([effRight(w-cbr*2,spw-sptr*2,o),-h/2,0]) fm("l");
+                }
+                if (lf!=undef) {
+                    a=lf[0]; o=lf[1]; sp=lf[2]; sph=sp[1]; sptr=sp[3]; spbr=sp[5];
+                    translate([-w/2,effTop(h-ctl*2,sph-sptr*2,o),0]) fm("b");
+                    translate([-w/2,-effBottom(h-cbl*2,sph-spbr*2,o),0]) fm("u");
+                }
+                if (rt!=undef) {
+                    a=rt[0]; o=rt[1]; sp=rt[2]; sph=sp[1]; sptl=sp[2]; spbl=sp[4];
+                    translate([w/2,effTop(h-ctr*2,sph-sptl*2,o),0]) fm("b");
+                    translate([w/2,-effBottom(h-cbr*2,sph-spbl*2,o),0]) fm("u");
                 }
             }
         }
     }
 
-    module sheetCore_v2( panel ) {
-        if ( panel==undef ) echo( "***** MISSING PARAMETER *****" );
-        else {
-            w=panel[0]; h=panel[1];
-            ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
-            hull()
-            {
-                s=1e-5;
-                translate([-w/2,h/2,0])
-                if ( ctl==0 )
-                    translate([0,-s,0]) square([s,s]);
-                else
-                    translate([ctl,-ctl,0]) circle(r=ctl);
-                translate([w/2,h/2,0])
-                if ( ctr==0 )
-                    translate([-s,-s,0]) square([s,s]);
-                else
-                    translate([-ctr,-ctr,0]) circle(r=ctr);
-                translate([-w/2,-h/2,0])
-                if ( cbl==0 )
-                    square([s,s]);
-                else
-                    translate([cbl,cbl,0]) circle(r=cbl);
-                translate([w/2,-h/2,0])
-                if ( cbr==0 )
-                    translate([-s,0,0]) square([s,s]);
-                else
-                    translate([-cbr,cbr,0]) circle(r=cbr);
-            }
-        }
-    }
+    // module sheetCore_v2( panel ) {
+    //     if ( panel==undef ) echo( "***** MISSING PARAMETER *****" );
+    //     else {
+    //         w=panel[0]; h=panel[1];
+    //         ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
+    //         hull()
+    //         {
+    //             s=1e-5;
+    //             translate([-w/2,h/2,0])
+    //             if ( ctl==0 )
+    //                 translate([0,-s,0]) square([s,s]);
+    //             else
+    //                 translate([ctl,-ctl,0]) circle(r=ctl);
+    //             translate([w/2,h/2,0])
+    //             if ( ctr==0 )
+    //                 translate([-s,-s,0]) square([s,s]);
+    //             else
+    //                 translate([-ctr,-ctr,0]) circle(r=ctr);
+    //             translate([-w/2,-h/2,0])
+    //             if ( cbl==0 )
+    //                 square([s,s]);
+    //             else
+    //                 translate([cbl,cbl,0]) circle(r=cbl);
+    //             translate([w/2,-h/2,0])
+    //             if ( cbr==0 )
+    //                 translate([-s,0,0]) square([s,s]);
+    //             else
+    //                 translate([-cbr,cbr,0]) circle(r=cbr);
+    //         }
+    //     }
+    // }
     
-    module sheetCore( panel ) {
-        if ( panel==undef ) echo( "***** MISSING PARAMETER *****" );
-        else {
-            w=panel[0]; h=panel[1];
-            ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
-            up=panel[6]; dn=panel[7]; lf=panel[8]; rt=panel[9];
-            t=1;
-            union() {
-                difference() {
-                    //color( "yellow", 0.5 )
-                    square( [w,h], center=true);
-                    //color( "red", 0.5 )
-                    union() {
-                        if ( ctl!=0 )
-                            translate([-w/2-t,h/2-ctl,0])
-                            square([ctl+t,ctl+t]);
-                        if ( ctr!=0 )
-                            translate([w/2-ctr,h/2-ctr,0])
-                            square([ctr+t,ctr+t]);
-                        if ( cbl!=0 )
-                            translate([-w/2-t,-h/2-t,0])
-                            square([cbl+t,cbl+t]);
-                        if ( cbr!=0 )
-                            translate([w/2-cbr,-h/2-t,0])
-                            square([cbr+t,cbr+t]);
-                    }
-                }
-                //color( "green", 0.5 )
+    module panelCore( panel ) {
+        has=panel!=undef;
+        assert(has,"panelCore(): missing parameter");
+        
+        w=panel[0]; h=panel[1];
+        ctl=panel[2]; ctr=panel[3]; cbl=panel[4]; cbr=panel[5];
+        up=panel[6]; dn=panel[7]; lf=panel[8]; rt=panel[9];
+        t=1;
+        union() {
+            difference() {
+                //color( "yellow", 0.5 )
+                square( [w,h], center=true);
+                //color( "red", 0.5 )
                 union() {
                     if ( ctl!=0 )
-                        translate([-w/2+ctl,h/2-ctl,0])
-                        circle(r=ctl);
+                        translate([-w/2-t,h/2-ctl,0])
+                        square([ctl+t,ctl+t]);
                     if ( ctr!=0 )
                         translate([w/2-ctr,h/2-ctr,0])
-                        circle(r=ctr);
+                        square([ctr+t,ctr+t]);
                     if ( cbl!=0 )
-                        translate([-w/2+cbl,-h/2+cbl,0])
-                        circle(r=cbl);
+                        translate([-w/2-t,-h/2-t,0])
+                        square([cbl+t,cbl+t]);
                     if ( cbr!=0 )
-                        translate([w/2-cbr,-h/2+cbr,0])
-                        circle(r=cbr);
+                        translate([w/2-cbr,-h/2-t,0])
+                        square([cbr+t,cbr+t]);
                 }
+            }
+            //color( "green", 0.5 )
+            union() {
+                if ( ctl!=0 )
+                    translate([-w/2+ctl,h/2-ctl,0])
+                    circle(r=ctl);
+                if ( ctr!=0 )
+                    translate([w/2-ctr,h/2-ctr,0])
+                    circle(r=ctr);
+                if ( cbl!=0 )
+                    translate([-w/2+cbl,-h/2+cbl,0])
+                    circle(r=cbl);
+                if ( cbr!=0 )
+                    translate([w/2-cbr,-h/2+cbr,0])
+                    circle(r=cbr);
             }
         }
     }
@@ -327,8 +349,8 @@ $fn=50;
 
     // main - length of main panel
     // ext  - length of extension
-    // off  - offset or ext relative to main
-    // return outermost position
+    // off  - offset of ext relative to main
+    // return innermost position
     function effLeft  (main,ext,off) = min(main/2,ext/2-off);
     function effRight (main,ext,off) = min(main/2,ext/2+off);
     function effTop   (main,ext,off) = min(main/2,ext/2+off);

@@ -7,7 +7,7 @@
 //
 //     profile = StepperMotorProfile( ... ) - create profile
 //     StepperMotor( profile )              - draw 3D
-//     StepperMotorPanelHole( profile )     - draw 2D panel holes
+//     StepperMotorPanelHoles( profile )     - draw 2D panel holes
 
 include <KVTree.scad>
 include <utility.scad>

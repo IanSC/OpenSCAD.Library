@@ -327,9 +327,9 @@ include <utility.scad>
         toothCount,
         beltWidth,
         shaftDiameter,
-        flangeOffset,
-        topFlangeHeight,
-        bottomFlangeHeight,
+        flangeOffset=0,
+        topFlangeHeight=0,
+        bottomFlangeHeight=0,
         hubInfo              // [ diameter, height ]
     ) = let (
         eTOffset = (flangeOffset==0||topFlangeHeight   ==0)?0:flangeOffset,

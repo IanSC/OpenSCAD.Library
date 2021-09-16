@@ -3,35 +3,35 @@ include <nuts-bolts.scad>
 include <timing-pulley.scad>
 include <stepper-motor.scad>
 include <thrust-bearing.scad>
-include <panels.scad>
+include <panel-tnut-notched.scad>
 include <orientation.scad>
-include <orientation.scad>
+include <positioning.scad>
 include <stepper-motor-assembly.scad>
 include <misc-items.scad>
 
-$fn=20;
+//$fn=20;
 
 module panelColor() { color( "green", 0.5 ) children(); }
 
 //
 //
 //
-    
-   Body();
-   ControlButtons();
-   Platform( 0 );
-   UpperFlange();
-   UpperMotor();
-   ShowPCB();
-    *translate( [0,-mainWidth/2,0] )
+
+    Body();
+    ControlButtons();
+    Platform( 0 );
+    UpperFlange();
+    UpperMotor();
+    ShowPCB();
+    translate( [0,-mainWidth/2,0] )
         rotate( [90,0,0] )
         JoyStick();
 
     // thrustBearingProfile = [ "tb", model, innerDiameter, outerDiameter, height ]
-    thrustBearingProfile = ThrustBearingFindModel( "AKX4565" );
+    thrustBearingProfile = ThrustBearingFromLibrary( "AKX4565" );
 
-    translate( [0,0,-ThrustBearingThickness( thrustBearingProfile )-10] )
-    ThrustBearing( thrustBearingProfile );
+    translate( [0,0,-kvGet(thrustBearingProfile,"thickness")-10] )
+        ThrustBearing( thrustBearingProfile );
 
 //
 // GLOBALS
@@ -61,22 +61,34 @@ module panelColor() { color( "green", 0.5 ) children(); }
     
     platformConnectorWidth = 60; // width of axle connectors
 
-    flangeBearing_PROFILE = FlangeBearingBuildProfile(
-        shaftDiameter=8, boltDiameter=5, centerToBolts=36.5/2,
-        width=48, depth=27, mainHeight=13, baseHeight=4 );
+    flangeBearing_PROFILE = FlangeBearingProfile(
+        shaftDiameter=8, boltDiameter=5, boltDistance=36.5,
+        width=48, depth=27, height=13, baseHeight=4 );
 
-    panelNUT = NutBuildProfile( shape="hex", boltDiameter=3, nutFaceSize=5.5, thickness=2.5 );
-    panelBoltLength = 15;
-    panelNutEdgeGap = 10;
+    panelNUT = NutProfile( shape="hex", boltDiameter=3, nutDiameter=5.5, thickness=2.5 );
+//    panelBoltLength = 15;
+//    panelNutEdgeGap = 10;
 
     // tnutProfile  = [ nutProfile, boltLength, edgeGap ];
-    T_NUT_PROFILE = [ panelNUT, panelBoltLength, panelNutEdgeGap ];
+    T_NUT_PROFILE = TNutCageProfile(
+        connectedPanelThickness = metalThickness,
+//        boltDiameter = 3,
+        nutProfile = panelNUT,
+        boltLength = 12,
+        nutEdgeGap = 5
+    );
+    //[ panelNUT, panelBoltLength, panelNutEdgeGap ];
 
-    notchWidthAllowance  = 0.2; // allowance for notch width
-    notchHeightAllowance = 0.1; // allowance for notch height
+//    notchWidthAllowance  = 0.2; // allowance for notch width
+//    notchHeightAllowance = 0.1; // allowance for notch height
 
     // notchProfile = [ notchHeight, widthAllowance, heightAllowance ];
-    NOTCH_PROFILE  = [ metalThickness, notchWidthAllowance, notchHeightAllowance ];
+    NOTCH_PROFILE = NotchProfile(
+        panelThickness = metalThickness,
+        holeWidthAllowance = 0.2,
+        holeHeightAllowance = 0.1
+    );
+    // [ metalThickness, notchWidthAllowance, notchHeightAllowance ];
 
     buttonProfile = ButtonBuildProfile(
         model = "Shopee",
@@ -130,11 +142,11 @@ module panelColor() { color( "green", 0.5 ) children(); }
                 leftPos = mainWidth/2-platformLeftOffset;
                 translate( [-leftPos,0,0] )
                     rotate( [0,0,90] )
-                    TNutCageNotched_F( platformDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_F( platformConnectorWidth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 rightPos = mainWidth/2-platformRightOffset;
                 translate( [rightPos,0,0] )
                     rotate( [0,0,90] )
-                    TNutCageNotched_F( platformDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_F( platformConnectorWidth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
             }
         }
     }
@@ -148,7 +160,7 @@ module panelColor() { color( "green", 0.5 ) children(); }
             }
             {
                 translate( [0,platformHeightOffset,0] )
-                TNutCageNotched_M( platformConnectorWidth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                TNutCageNotched_M( platformConnectorWidth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 circle( d=shaftDiameter );
             }
         }
@@ -174,7 +186,8 @@ module panelColor() { color( "green", 0.5 ) children(); }
         translate( [-pulleyToPulleyDistance,0,0] )
         rotate( [180,0,0] )
         StepperMotorAssembly( motorProfile, motorPulleyProfile, drivenPulleyProfile, 
-            beltLength, pulleyToMotorOffset, false );
+            beltLength, pulleyOffset=pulleyToMotorOffset,
+            reverseDrivenPulley=false, omitTeeth=true );
 
         // shaft
         translate( [0,0,-30-metalThickness] )
@@ -182,13 +195,12 @@ module panelColor() { color( "green", 0.5 ) children(); }
         cylinder(controlBoxHeight+30,r=4);
 
         // color( "red", 0.5 )
-        color( "red" ) panelTop_Matrix()            linear_extrude( metalThickness, center=true ) panelTopDXF();
-        color( "red" ) panelBottom_Matrix()         linear_extrude( metalThickness, center=true ) panelBottomDXF();
+        color( "red" ) panelTop_Matrix()    linear_extrude( metalThickness, center=true ) panelTopDXF();
+        color( "red" ) panelBottom_Matrix() linear_extrude( metalThickness, center=true ) panelBottomDXF();
         // panelColor()
         panelLeft_Matrix()           linear_extrude( metalThickness, center=true ) panelLeftDXF();
         panelRight_Matrix()          linear_extrude( metalThickness, center=true ) panelRightDXF();
         panelRightInnerWall_Matrix() linear_extrude( metalThickness, center=true ) panelRightInnerWallDXF();
-
     }
         
     //
@@ -196,7 +208,7 @@ module panelColor() { color( "green", 0.5 ) children(); }
     //
     
     module panelTop_Matrix() {
-        OTop( metalThickness,0,0,controlBoxHeight)
+        OTop( metalThickness,controlBoxHeight)
         //translate( [0,0,controlBoxHeight-metalThickness/2] )
         children();
     }
@@ -240,16 +252,16 @@ module panelColor() { color( "green", 0.5 ) children(); }
                 // left notches
                 translate( [-mainWidth/2,0,0] )
                 rotate( [0,0,90] )
-                    TNutCageNotched_M( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_M( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // right section wall
                 s = ( mainDepth - stepperMotorHoleDepth )/2;
                 offset = mainDepth/2-s/2;
                 translate( [mainWidth/2-rightSectionWidth-metalThickness/2,offset,0] )
                 rotate( [0,0,-90] )
-                    TNutCageNotched_F( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_F( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 translate( [mainWidth/2-rightSectionWidth-metalThickness/2,-offset,0] )
                 rotate( [0,0,-90] )
-                   TNutCageNotched_F( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                   TNutCageNotched_F( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 // motor hole
                 translate( [-rightSectionWidth/2+mainWidth/2+0.5,0,0] )
                     square( [rightSectionWidth+1,stepperMotorHoleDepth], center=true );
@@ -259,18 +271,18 @@ module panelColor() { color( "green", 0.5 ) children(); }
                 // right notches
                 translate( [mainWidth/2,offset,0] )
                 rotate( [0,0,-90] )
-                    TNutCageNotched_M( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_M( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 translate( [mainWidth/2,-offset,0] )
                 rotate( [0,0,-90] )
-                    TNutCageNotched_M( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_M( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 // flange bearing
                 rotate( [0,0,90] )
-                    FlangeBearingHole( flangeBearing_PROFILE, omitCenterHole=true, shaftHoleAllowance=2 );
-                // stepper motor                
+                    FlangeBearingPanelHole( flangeBearing_PROFILE, omitCenterHole=true, enlargeShaft=2 );
+                // stepper motor
                 rotate( [0,0,90] )
                 translate( [0,pulleyToPulleyDistance,0] )
                     StepperMotor( motorProfile );
-                    // Nema17MountingHoles();                    
+                    // Nema17MountingHoles();
             }
         }
     }
@@ -282,18 +294,18 @@ module panelColor() { color( "green", 0.5 ) children(); }
                 // left notches
                 translate( [-mainWidth/2,0,0] )
                 rotate( [0,0,90] )
-                    TNutCageNotched_M( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_M( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // right section wall
                 translate( [mainWidth/2-rightSectionWidth-metalThickness/2,0,0] )
                 rotate( [0,0,90] )
-                    TNutCageNotched_F( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_F( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // right notches
                 translate( [mainWidth/2,0,0] )
                 rotate( [0,0,-90] )
-                    TNutCageNotched_M( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_M( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // flange bearing
                 rotate( [0,0,90] )
-                    FlangeBearingHole( flangeBearing_PROFILE, shaftHoleAllowance=2 );
+                    FlangeBearingPanelHole( flangeBearing_PROFILE, enlargeShaft=2 );
                 // pcb
                 panelBottomDXF_Extra();
             }
@@ -312,13 +324,13 @@ module panelColor() { color( "green", 0.5 ) children(); }
             {
                 // top notch holes
                 translate( [0,metalThickness/2+controlBoxHeight-metalThickness,0] )
-                    TNutCageNotched_F( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_F( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // bottom notch holes
                 translate( [0,metalThickness/2,0] )
-                    TNutCageNotched_F( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_F( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // flange bearing
                 translate( [0,platformAxleHeight,0] )
-                    FlangeBearingHole( flangeBearing_PROFILE, shaftHoleAllowance=2 );
+                    FlangeBearingPanelHole( flangeBearing_PROFILE, enlargeShaft=2 );
             }
         }
     }
@@ -337,19 +349,19 @@ module panelColor() { color( "green", 0.5 ) children(); }
                 s = ( mainDepth - stepperMotorHoleDepth )/2;
                 offset = mainDepth/2-s/2;
                 translate( [offset,metalThickness/2+controlBoxHeight-metalThickness,0] )
-                    TNutCageNotched_F( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_F( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 translate( [-offset,metalThickness/2+controlBoxHeight-metalThickness,0] )
-                    TNutCageNotched_F( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_F( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 // bottom notch holes
                 translate( [0,metalThickness/2,0] )
-                    TNutCageNotched_F( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_F( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 // flange bearing
                 translate( [0,platformAxleHeight,0] )
-                    FlangeBearingHole( flangeBearing_PROFILE, shaftHoleAllowance=2 );
+                    FlangeBearingPanelHole( flangeBearing_PROFILE, enlargeShaft=2 );
                 // stepper motor                
                 translate( [0,platformAxleHeight-pulleyToPulleyDistance,0] )
                     // Nema17MountingHoles();
-                    StepperMotorHole( motorProfile );
+                    StepperMotorPanelHoles( motorProfile );
             }
         }
     }
@@ -363,12 +375,12 @@ module panelColor() { color( "green", 0.5 ) children(); }
                 s = ( mainDepth - stepperMotorHoleDepth )/2;
                 offset = mainDepth/2-s/2;
                 translate( [offset,controlBoxHeight,0] )
-                    TNutCageNotched_M( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_M( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 translate( [-offset,controlBoxHeight,0] )
-                    TNutCageNotched_M( s, T_NUT_PROFILE, NOTCH_PROFILE, 0 );
+                    TNutCageNotched_M( s, 0, T_NUT_PROFILE, NOTCH_PROFILE );
                 // bottom notches
                 rotate( [0,0,180] ) {
-                    TNutCageNotched_M( mainDepth, T_NUT_PROFILE, NOTCH_PROFILE, 2 );
+                    TNutCageNotched_M( mainDepth, 2, T_NUT_PROFILE, NOTCH_PROFILE );
                 }
                 // pcb
                 panelRightInnerWallDXF_Extra();
@@ -380,36 +392,37 @@ module panelColor() { color( "green", 0.5 ) children(); }
 // STEPPER MOTOR
 //
 
-    motorProfile = StepperMotorBuildProfile( bodyWidth=42.20, bodyHeight=35+40, shaftDiameter=5, shaftLength=18,
-        boltDiameter = 4, boltLength = 5, boltToBoltDistance = 20,
-        upperCylinderDiameter=38, upperCylinderHeight=40,
-        upperFlangeHeight=4.8, betweenFlangeTaper=-1 );
+    motorProfile = StepperMotorProfile( bodyDiameter=42.20, bodyLength=35+40, shaftDiameter=5, shaftLength=18,
+        boltDiameter = 4, boltLength = 5, boltDistance = 20,
+        frontCylinder = [38,40],
+        flangeThickness = [4.8,0],
+        bodyTaper=1 );
+//        upperCylinderDiameter=38, upperCylinderHeight=40,
+//        upperFlangeHeight=4.8, betweenFlangeTaper=-1 );
 
-    motorPulleyProfile = PulleyBuildCADProfile(
-        model          = "GT2 2mm",
-        teethCount     = 20,
-        beltWidth      = 8,
-        shaftDiameter  = 5,
-        retainerHeight = 1,
-        idlerHeight    = 1,
-        baseDiameter   = 16,
-        baseHeight     = 6
+    motorPulleyProfile = TimingPulleyProfileCAD(
+        toothModel         = "GT2 2mm",
+        toothCount         = 20,
+        beltWidth          = 8,
+        shaftDiameter      = 5,
+        topFlangeHeight    = 1,
+        bottomFlangeHeight = 1,
+        hubInfo            = [16,6]
     );
 
-    drivenPulleyProfile = PulleyBuildCADProfile(
-        model          = "GT2 2mm",
-        teethCount     = 60,
-        beltWidth      = 8,
-        shaftDiameter  = 8,
-        retainerHeight = 1.5,
-        idlerHeight    = 1.5,
-        baseDiameter   = 20,
-        baseHeight     = 6
+    drivenPulleyProfile = TimingPulleyProfileCAD(
+        toothModel         = "GT2 2mm",
+        toothCount         = 60,
+        beltWidth          = 8,
+        shaftDiameter      = 8,
+        topFlangeHeight    = 1.5,
+        bottomFlangeHeight = 1.5,
+        hubInfo            = [20,6]
     );
 
     beltLength = 158;
     pulleyToMotorOffset = 3;
-    pulleyToPulleyDistance = CenterToCenterDistance( motorPulleyProfile, drivenPulleyProfile, beltLength );
+    pulleyToPulleyDistance = TimingPulleyCenterDistance( motorPulleyProfile, drivenPulleyProfile, beltLength );
 
 //
 // PCB
@@ -525,6 +538,7 @@ module panelColor() { color( "green", 0.5 ) children(); }
         rotate( [0,-90,0] )
         translate( [-pulleyToPulleyDistance,0,0] )
         StepperMotorAssembly( motorProfile, motorPulleyProfile, drivenPulleyProfile, 
-            beltLength, pulleyToMotorOffset, false );
+            beltLength, pulleyOffset=pulleyToMotorOffset,
+            reverseDrivenPulley=false, omitTeeth=true );
     }
 
