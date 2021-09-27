@@ -20,12 +20,28 @@ difference() {
 //cutCornerTR(50,25,30,10);
 
 function fCutCorner(xOffset,yOffset,r) = let (
+    // POV: top/right
+    //
+    // 2 connected lines L1, L2
+    // find circle with radius r tangent to the lines
+    //
+    //        o
+    //  L1 ----  -  -  - +
+    //       a \         
+    //            \      |
+    //               \   
+    //                  \|
+    //                   |
+    //                  L2
+    //
     angle=atan2(yOffset,xOffset),
-    a2=(180-angle)/2,
-    dx = r/tan(a2), // tan(a2)=r/x;
-    cOrigin=[-xOffset-dx,-r],
-    dx2=cos(angle)*dx,
-    dy2=sin(angle)*dx,
+    a =(180-angle)/2,
+    // delta = distance from o along L1,L2
+    //         where the circle is tangent to lines
+    delta = r/tan(a), // tan(a)=r/x;
+    cOrigin=[-xOffset-delta,-r],
+    dx2=cos(angle)*delta,
+    dy2=sin(angle)*delta,
     
     cutExact=[[-xOffset,0],[0,0],[0,-yOffset],[-xOffset,0]],
 
@@ -40,7 +56,7 @@ function fCutCorner(xOffset,yOffset,r) = let (
     v=[-xOffset+dx2-cOrigin.x,-dy2-cOrigin.y],
     circlePieExtended=[[cOrigin.x,r],cOrigin,[cOrigin.x+v.x*2,cOrigin.y+v.y*2],[cOrigin.x,r]]
 
-) [cutExtended,cOrigin,circlePieExtended,dx];
+) [cutExtended,cOrigin,circlePieExtended,delta];
 
 module cutCornerTR(xOffset,yOffset,r1,r2) {
     
@@ -58,23 +74,18 @@ module cutCornerTR(xOffset,yOffset,r1,r2) {
         translate(cOrigin)
             circle(r1);
     }
+    
     c2=fCutCorner(yOffset,xOffset,r2);
     cut2=c2[0];
     cOrigin2=c2[1];
     circlePieExtended2=c2[2];
     dx2=c2[3];
-    ce2=[for(i=circlePieExtended2) [i.y,i.x]];
+    reverseXY=[for(i=circlePieExtended2) [i.y,i.x]];
     
-    //translate([0,0,2]) color("green")
-    //    polygon(ce2);
+    //polygon(cut2);
     
-    //translate([0,0,2]) color("green")
     difference() {
-        //translate([-r2,-yOffset-dx2])
-        //mirror([1,-1,0])
-        //translate([-cOrigin2.x,-cOrigin2.y])
-        //    polygon(circlePieExtended2);
-        polygon(ce2);
+        polygon(reverseXY);
         translate([cOrigin2.y,cOrigin2.x])
             circle(r2);
     }

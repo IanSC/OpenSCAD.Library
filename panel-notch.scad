@@ -1,6 +1,6 @@
 //
 // PANEL-NOTCHES
-// by ISC 2021
+// by ISC 2021-09
 //
 //     NotchProfile( ... )                         - create profile
 //     Notch( targetWidth, notches, profile )      - draw 2D centered notches or notch holes

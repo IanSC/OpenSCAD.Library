@@ -1,6 +1,6 @@
 //
 // KVTree
-// by ISC 2021
+// by ISC 2021-09
 //
 // searchable key-value tree structure
 // for compact storage of data values

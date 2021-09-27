@@ -8,7 +8,8 @@ Searchable tree data structure for storing multiple values.
 <tr><td><b>kvKeys</b>( table, key )</td><td>get keys</td></tr>
 <tr><td><b>kvValues</b>( table, key )</td><td>get values</td></tr>
 <tr><td><b>kvExists</b>( table, key )</td><td>check if key exists</td></tr>
-<tr><td><b>kvShow</b>( table )</td><td>echo to console</td></tr>
+<tr><td><b>kvEcho</b>( table )</td><td>echo to console</td></tr>
+<tr><td><b>kvEchoAligned</b>( table )</td><td>echo to console aligned</td></tr>
 <tr><td><b>kvGet</b>( table, key, defaultValue )</td><td>get expected key</td></tr>
 <tr><td><b>kvSearch</b>( table, key, defaultValue )</td><td>get optional key</td></tr>
 <tr><td><b>kvSearchLax</b>( table, key, defaultValue )</td><td>get optional key, optional table</td></tr>
@@ -43,7 +44,12 @@ Searchable tree data structure for storing multiple values.
 <tr><td><b><i>return<td>boolean
 </table>
 
-#### _kvShow( table )_
+#### _kvEcho( table )_
+<table>
+<tr><td>table       <td>KVTree table to display on console
+</table>
+
+#### _kvEchoAligned( table )_
 <table>
 <tr><td>table       <td>KVTree table to display on console
 </table>

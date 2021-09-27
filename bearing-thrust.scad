@@ -1,9 +1,9 @@
 //
 // THRUST BEARINGS
-// by Ian Co 2021
+// by ISC 2021-09
 //
-// accurate by measurement for product design
-// for rough visual representation only
+// rough visual representation only
+// accurate measurement/holes for product design
 //
 //     profile = ThrustBearingProfile( ... )         - create profile
 //     profile = ThrustBearingFromLibrary( "51120" ) - use specific model
@@ -198,9 +198,9 @@ include <utility.scad>
         [ "AKX3047",  30,  47,  4 ],
         [ "AKX3552",  35,  52,  4 ],
         [ "AKX4060",  40,  60,  5 ],
-        [ "AKX4565",  45,  65,  5 ],
+        [ "AKX4565",  45,  65,  5 ], // 
         [ "AKX5070",  50,  70,  5 ],
-        [ "AKX6085",  60,  85,  5 ],
+        [ "AKX6085",  60,  85,  5 ], // 
         [ "AKX6590",  65,  90,  5 ],
         [ "AKX75100", 75, 100,  6 ],
 

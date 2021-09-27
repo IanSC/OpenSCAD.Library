@@ -1,6 +1,6 @@
 //
 // PANEL-TNUT
-// by ISC 2021
+// by ISC 2021-09
 //
 //     TNutCageProfile( ... )                                                           - create profile
 //     TNutCage_M( profile, connectedPanelThickness )                                   - draw 2D bolt/nut capture slots

@@ -1,6 +1,6 @@
 //
 // PANEL-TNUT-NOTCHED
-// by ISC 2021
+// by ISC 2021-09
 //
 //     TNutCageNotched_M( targetWidth, notches, tnutProfile, notchProfile )  - draw 2D t-nut capture with notches
 //     TNutCageNotched_F( targetWidth, notches, tnutProfile, notchProfile  ) - draw 2D t-nut capture with notches

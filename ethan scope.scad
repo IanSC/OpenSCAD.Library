@@ -18,20 +18,22 @@ module panelColor() { color( "green", 0.5 ) children(); }
 //
 
     Body();
-    ControlButtons();
+    //ControlButtons();
     Platform( 0 );
     UpperFlange();
     UpperMotor();
     ShowPCB();
-    translate( [0,-mainWidth/2,0] )
+    SpeedSettings();
+    translate( [-30,-mainDepth/2,38] )
         rotate( [90,0,0] )
-        JoyStick();
+        #JoyStick();
 
     // thrustBearingProfile = [ "tb", model, innerDiameter, outerDiameter, height ]
-    thrustBearingProfile = ThrustBearingFromLibrary( "AKX4565" );
+    thrustBearing1 = ThrustBearingFromLibrary( "AKX4565" );
+    thrustBearing2 = ThrustBearingFromLibrary( "AKX6085" );
 
-    translate( [0,0,-kvGet(thrustBearingProfile,"thickness")-10] )
-        ThrustBearing( thrustBearingProfile );
+    translate( [0,0,-kvGet(thrustBearing2,"thickness")-10] )
+        ThrustBearing( thrustBearing2 );
 
 //
 // GLOBALS
@@ -41,7 +43,7 @@ module panelColor() { color( "green", 0.5 ) children(); }
     controlBoxHeight = 75;
 
     mainWidth  = 180;
-    mainDepth  = 80;
+    mainDepth  = 105; // 80
     mainHeight = 155;
 
     allowanceForTNut = 10; // extra material for t-nut
@@ -57,7 +59,7 @@ module panelColor() { color( "green", 0.5 ) children(); }
 
     platformDepth          = 80;
     platformLeftOffset     = 20;
-    platformRightOffset    = 65;
+    platformRightOffset    = 55;
     
     platformConnectorWidth = 60; // width of axle connectors
 
@@ -421,7 +423,7 @@ module panelColor() { color( "green", 0.5 ) children(); }
     );
 
     beltLength = 158;
-    pulleyToMotorOffset = 3;
+    pulleyToMotorOffset = 4;
     pulleyToPulleyDistance = TimingPulleyCenterDistance( motorPulleyProfile, drivenPulleyProfile, beltLength );
 
 //
@@ -492,11 +494,11 @@ module panelColor() { color( "green", 0.5 ) children(); }
             translate( [0, buttonOffset,0] ) Button( buttonProfile );
             translate( [0,-buttonOffset,0] ) Button( buttonProfile );
         }
-        // speed dials
-        translate( [65,-mainDepth/2,37] ) rotate( [90,0,0] ) {
-        translate( [0, 16,0] ) Potentiometer();
-        translate( [0,-16,0] ) Potentiometer();
-        }
+        //// speed dials
+        //translate( [65,-mainDepth/2,37] ) rotate( [90,0,0] ) {
+        //translate( [0, 16,0] ) Potentiometer();
+        //translate( [0,-16,0] ) Potentiometer();
+        //}
     }
 
     module ControlButtonsHoles() {
@@ -512,16 +514,31 @@ module panelColor() { color( "green", 0.5 ) children(); }
         cylinder( h=12.2, d1=26.2, d2=25.2 );
     }
 
+    module SpeedSettings() {
+        // speed dials
+        translate( [65,-mainDepth/2,37] ) rotate( [90,0,0] ) {
+        translate( [0, 16,0] ) Potentiometer();
+        translate( [0,-16,0] ) Potentiometer();
+        }
+    }
+
+    module SpeedSettingsHoles() {
+    }
+
 //
 // UPPER FLANGE BEARING
 //
     
     module UpperFlange() {
         translate( [0,0,platformAxleHeight] ) {
-            translate( [mainWidth/2-metalThickness,0,0] )
-                rotate( [0,-90,0] )
+            translate( [mainWidth/2,0,0] )
+                rotate( [0,90,0] )
                 rotate( [0,0,90] )
                 FlangeBearing( flangeBearing_PROFILE );
+            //translate( [mainWidth/2-metalThickness,0,0] )
+            //    rotate( [0,-90,0] )
+            //    rotate( [0,0,90] )
+            //    FlangeBearing( flangeBearing_PROFILE );
             translate( [-mainWidth/2+metalThickness,0,0] )
                 rotate( [0,90,0] )
                 rotate( [0,0,90] )
@@ -539,6 +556,6 @@ module panelColor() { color( "green", 0.5 ) children(); }
         translate( [-pulleyToPulleyDistance,0,0] )
         StepperMotorAssembly( motorProfile, motorPulleyProfile, drivenPulleyProfile, 
             beltLength, pulleyOffset=pulleyToMotorOffset,
-            reverseDrivenPulley=false, omitTeeth=true );
+            reverseDrivenPulley=true, omitTeeth=true );
     }
 

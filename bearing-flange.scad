@@ -1,9 +1,9 @@
 //
 // FLANGE BEARING - USING 2 or 4 BOLTS
-// by ISC 2021
+// by ISC 2021-09
 //
-// accurate by measurement for product design
-// for rough visual representation only
+// rough visual representation only
+// accurate measurement/holes for product design
 //
 //     profile = FlangeBearingProfile( ... ) - create profile
 //     FlangeBearing( profile )              - draw 3D

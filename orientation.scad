@@ -1,8 +1,8 @@
 //
 // ORIENTATION
-// by ISC 2021
+// by ISC 2021-09
 //
-// routines to easily position panels
+// routines to easily position panels in 3D
 //
 //     OTop(),  OBottom(),  OFront(),  OBack(),  OLeft(),  ORight()
 //     OFTop(), OFBottom(), OFFront(), OFBack(), OFLeft(), OFRight()

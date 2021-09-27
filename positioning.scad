@@ -1,6 +1,6 @@
 //
 // POSITIONING.SCAD
-// by ISC 2021
+// by ISC 2021-09
 //
 // routing to position 2D elements
 // used by Notch library

@@ -1,3 +1,9 @@
+//
+// STEPPER MOTOR ASSEMBLY
+// by ISC 2021-09
+//
+// stepper motor with timing pulleys
+
 include <timing-pulley.scad>
 include <stepper-motor.scad>
 

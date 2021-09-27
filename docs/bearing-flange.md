@@ -5,7 +5,7 @@
 <table>
 <tr><td><b>FlangeBearingProfile</b>( ... )</td><td>create profile</td></tr>
 <tr><td><b>FlangeBearing</b>( profile )</td><td>generate flange bearing</td></tr>
-<tr><td><b>FlangeBearingPanelHoles</b>( profile )</td><td>generate 2D holes for panel mounting</td></tr>
+<tr><td><b>FlangeBearingPanelHoles</b>( profile, omitCenterHole, enlargeShaft, enlargeBolt )</td><td>generate 2D holes for panel mounting</td></tr>
 </table>
 
 ---
@@ -31,7 +31,10 @@
 
 #### _FlangeBearingPanelHoles( profile )_
 <table>
-<tr><td>profile<td>&#10004;<td>flange bearing profile to generate panel holes for
+<tr><td>profile              <td>&#10004;<td>flange bearing profile to generate panel holes for
+<tr><td>omitCenterHole = true<td>        <td>skip hole for center shaft
+<tr><td>enlargeShaft = 1     <td>        <td>increase hole size for center shaft
+<tr><td>enlargeBolt = 1      <td>        <td>increase hole size for bolts
 </table>
 </details>
 
