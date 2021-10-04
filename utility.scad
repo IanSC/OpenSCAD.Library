@@ -28,9 +28,31 @@
 //
 //
 
+    //SELECT = function( d1, d2, d3, d4 ) ((d1!=undef) ? d1 : (d2!=undef) ? d2 : (d3!=undef) ? d3 : d4 );
     SELECT = function( d1, d2, d3 ) ((d1!=undef) ? d1 : (d2!=undef) ? d2 : d3 );
     IIF = function( cond, trueCond, falseCond ) ( cond ? trueCond : falseCond );
     function is_nan(x) = x!=x;
+
+    function getElementHelper( list, default=0, index0, index1=-1 ) =
+        // get elements with checking in case of error
+        ( list == undef || list[index0] == undef ) ? (
+            // not valid, return 0 instead
+            default
+        ) : (
+            ( index1 == -1 ) ? (
+                ( is_list( list[index0] ) ) ? 
+                    // no second index, but got list, return 0 instead
+                    default
+                :
+                    list[index0]
+            ) : (
+                ( list[index0][index1] == undef ) ?
+                    // return 0 instead
+                    default
+                :
+                    list[index0][index1]
+            )
+        );
 
 //
 // STRING

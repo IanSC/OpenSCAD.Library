@@ -107,7 +107,7 @@ include <utility.scad>
 //
 
     function LinearRailHolderSHFProfile(
-        model = "",
+        model              = "",
         shaftDiameter,
         boltDiameter       = 5,
         boltDistance,               // bolt to bolt distance

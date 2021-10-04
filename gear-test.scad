@@ -1,6 +1,7 @@
-use <gears.scad>
+use <gear.scad>
+use <involute_gears.scad>
 
-$fn=100;
+//$fn=100;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // example gear train.  
@@ -29,3 +30,24 @@ translate( [c2c,0,0] )
     gear2D( mm_per_tooth, n2, 5, clearance=clearance, $fn=fn );
 
 circle(d=10);
+
+translate( [0,0,1] )
+gear (circular_pitch=mm_per_tooth,
+number_of_teeth=n1//,
+  //gear_thickness = 12,
+  //rim_thickness = 15,
+  //hub_thickness = 17,
+  //circles=8
+  );
+  
+translate( [c2c,0,0] )
+rotate( [0,0,360/n2/2] )
+gear (circular_pitch=mm_per_tooth,
+number_of_teeth=n2//,
+  //gear_thickness = 12,
+  //rim_thickness = 15,
+  //hub_thickness = 17,
+  //circles=8
+  );
+  
+  
